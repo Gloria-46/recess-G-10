@@ -22,6 +22,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_transfers');
+        Schema::create('stock_transfers',function (Blueprint $table){
+            $table->id();
+$table->foreignId('product_id')->constrained();
+$table->string('to_branch');
+$table->integer('quantity');
+$table->foreignId('staff_id')->constrained('users');
+$table->timestamps();
+        });
     }
 };
