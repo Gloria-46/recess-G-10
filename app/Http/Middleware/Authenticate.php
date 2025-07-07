@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class Authenticate extends Middleware
 {
@@ -13,10 +14,17 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            if ($request->is('vendor') || $request->is('vendor/*')) {
-                return route('vendor.login');
+            // If the route is for customer, always redirect to customer login and use customer guard
+            if (
+                ($request->route() && $request->routeIs('customer.*')) ||
+                str_starts_with($request->path(), 'customer')
+            ) {
+                auth()->shouldUse('customer');
+                return route('customer.login');
             }
-            // return route('login'); // Commented out to prevent undefined route error
+            // Otherwise, fallback to vendor login and use vendor guard
+            auth()->shouldUse('vendor');
+            return route('vendor.login');
         }
     }
 } 

@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -56,15 +58,19 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'business_name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:vendors',
-                'password' => 'required|string|min:8|confirmed',
-                'phone' => 'nullable|string|max:20',
-                'address' => 'nullable|string',
+                'businessName' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:vendors,email',
+                'contact' => 'required|string|max:20',
+                'address' => 'required|string',
+                'yearOfEstablishment' => 'required|integer|min:1900|max:' . date('Y'),
+                'password' => 'required|string|min:8',
+                'passwordConfirmation' => 'required|string|same:password',
+                'applicationForm' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
+                'complianceCertificate' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
+                'bankStatement' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
             ]);
 
             if ($validator->fails()) {
-                // Log validation errors
                 \Log::error('Vendor registration validation failed', $validator->errors()->toArray());
                 return redirect()->back()
                     ->withErrors($validator)
@@ -72,26 +78,30 @@ class AuthController extends Controller
                     ->with('error', 'Validation failed: ' . json_encode($validator->errors()->all()));
             }
 
-            $vendor = Vendor::create([
-                'business_name' => $request->business_name,
-                'email' => $request->email,
-                'password' => \Hash::make($request->password),
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'about' => '',
-                'profile_image' => null,
-                'is_active' => true,
-            ]);
-
-            if (!$vendor) {
-                \Log::error('Vendor registration failed: Vendor not created');
-                return redirect()->back()->with('error', 'Vendor could not be created.');
+            // Validate with Java server before creating vendor
+            $javaValidationResult = $this->validateWithJavaServer($request);
+            
+            if (!$javaValidationResult['success']) {
+                return redirect()->back()
+                    ->withErrors(['java_validation' => $javaValidationResult['message']])
+                    ->withInput()
+                    ->with('error', 'Vendor validation failed: ' . $javaValidationResult['message']);
             }
 
-            \Log::info('Vendor registered successfully', ['id' => $vendor->id, 'email' => $vendor->email]);
-            \Auth::guard('vendor')->login($vendor);
+            // Save vendor locally as well
+            $vendor = Vendor::create([
+                'business_name' => $request->businessName,
+                'email' => $request->email,
+                'contact' => $request->contact,
+                'address' => $request->address,
+                'yearOfEstablishment' => $request->yearOfEstablishment,
+                'password' => Hash::make($request->password),
+                'application_form' => $request->file('applicationForm') ? $request->file('applicationForm')->getClientOriginalName() : null,
+                'compliance_certificate' => $request->file('complianceCertificate') ? $request->file('complianceCertificate')->getClientOriginalName() : null,
+                'bank_statement' => $request->file('bankStatement') ? $request->file('bankStatement')->getClientOriginalName() : null,
+            ]);
 
-            return redirect()->route('vendor.dashboard')->with('success', 'Registration successful!');
+            return redirect()->route('vendor.login')->with('success', 'Registration successful! Please check your email for your password.');
         } catch (\Exception $e) {
             \Log::error('Vendor registration exception', ['message' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Registration failed: ' . $e->getMessage());
@@ -175,5 +185,67 @@ class AuthController extends Controller
         DB::table('password_resets')->where('email', $request->email)->delete();
 
         return redirect()->route('vendor.login')->with('status', 'Your password has been reset! You can now log in.');
+    }
+
+    /**
+     * Validate vendor data with Java server
+     */
+    private function validateWithJavaServer(Request $request): array
+    {
+        try {
+            // Configure Java server URL - update this with your actual Java server URL
+            $javaServerUrl = env('SPRING_API_URL', 'http://localhost:8080/api') . '/validate-vendor';
+            
+            $validationData = [
+                'business_name' => $request->businessName,
+                'email' => $request->email,
+                'phone' => $request->contact,
+                'address' => $request->address,
+                'year_of_establishment' => $request->yearOfEstablishment,
+                'contact' => $request->contact,
+            ];
+
+            // Make HTTP request to Java server
+            $response = Http::timeout(30)->post($javaServerUrl, $validationData);
+            
+            if ($response->successful()) {
+                $result = $response->json();
+                
+                return [
+                    'success' => $result['success'] ?? false,
+                    'errors' => $result['errors'] ?? [],
+                    'data' => $result['data'] ?? null,
+                    'message' => $result['message'] ?? 'Validation completed'
+                ];
+            } else {
+                // If Java server is not available, log the error but continue with registration
+                Log::warning('Java validation server not available', [
+                    'url' => $javaServerUrl,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                
+                return [
+                    'success' => true, // Continue with registration if Java server is down
+                    'errors' => [],
+                    'data' => null,
+                    'message' => 'Java validation server not available, proceeding with registration'
+                ];
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Java validation server error', [
+                'error' => $e->getMessage(),
+                'vendor_data' => $request->only(['businessName', 'email', 'contact', 'address'])
+            ]);
+            
+            // If Java server is completely unavailable, continue with registration
+            return [
+                'success' => true,
+                'errors' => [],
+                'data' => null,
+                'message' => 'Java validation server unavailable, proceeding with registration'
+            ];
+        }
     }
 } 

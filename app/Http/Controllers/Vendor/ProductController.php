@@ -7,9 +7,12 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProductController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index()
     {
         $products = Product::where('vendor_id', Auth::guard('vendor')->id())
@@ -28,10 +31,14 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'color' => 'required|string',
+            'size' => 'required|string',
+            'image' => 'nullable|image',
+            'current_stock' => 'nullable|integer',
+            'is_active' => 'boolean',
+            'category' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
@@ -42,7 +49,18 @@ class ProductController extends Controller
         $validated['vendor_id'] = Auth::guard('vendor')->id();
         $validated['is_active'] = true;
 
-        Product::create($validated);
+        $product = Product::create([
+            'vendor_id' => Auth::guard('vendor')->id(),
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'price' => $validated['price'],
+            'color' => $validated['color'] ?? null,
+            'size' => $validated['size'] ?? null,
+            'image' => $path ?? null,
+            'current_stock' => $validated['current_stock'] ?? 0,
+            'is_active' => $validated['is_active'] ?? true,
+            'category' => $validated['category'] ?? null,
+        ]);
 
         return redirect()->route('vendor.products.index')
             ->with('success', 'Product created successfully.');
@@ -66,11 +84,14 @@ class ProductController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'color' => 'required|string',
+            'size' => 'required|string',
+            'image' => 'nullable|image',
+            'current_stock' => 'nullable|integer',
             'is_active' => 'boolean',
+            'category' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
@@ -82,7 +103,17 @@ class ProductController extends Controller
             $validated['image'] = $path;
         }
 
-        $product->update($validated);
+        $product->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'price' => $validated['price'],
+            'color' => $validated['color'] ?? null,
+            'size' => $validated['size'] ?? null,
+            'image' => $path ?? $product->image,
+            'current_stock' => $validated['current_stock'] ?? $product->current_stock,
+            'is_active' => $validated['is_active'] ?? $product->is_active,
+            'category' => $validated['category'] ?? $product->category,
+        ]);
 
         return redirect()->route('vendor.products.index')
             ->with('success', 'Product updated successfully.');

@@ -30,11 +30,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $low_stock_products = Product::where('vendor_id', $vendor->id)
-            ->where('stock', '<', 10)
-            ->take(5)
-            ->get();
-
-        return view('vendor.dashboard', compact('stats', 'recent_orders', 'low_stock_products'));
+        return view('vendor.dashboard', compact('stats', 'recent_orders'));
     }
 }

@@ -17,8 +17,11 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 10, 2);
-            $table->integer('stock');
+            $table->string('color');
+            $table->string('size');
             $table->string('image')->nullable();
+            $table->integer('current_stock')->nullable();
+            $table->string('category')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

@@ -1,173 +1,234 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Product - Vendor Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="min-h-screen">
-        <!-- Navigation -->
-        <nav class="bg-white shadow-lg">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <div class="flex-shrink-0 flex items-center">
-                            <h1 class="text-xl font-bold text-gray-800">Vendor Dashboard</h1>
-                        </div>
-                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <a href="{{ route('vendor.dashboard') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Dashboard
-                            </a>
-                            <a href="{{ route('vendor.products.index') }}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Products
-                            </a>
-                            <a href="{{ route('vendor.orders.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Orders
-                            </a>
-                            <a href="{{ route('vendor.profile.edit') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Profile
-                            </a>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <form method="POST" action="{{ route('vendor.logout') }}">
-                            @csrf
-                            <button type="submit" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
+@extends('layouts.vendor')
+
+@section('title', 'Edit Product - Vendor Dashboard')
+
+@section('content')
+<div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2 flex items-center">
+                        <i class="fas fa-edit mr-3 text-blue-600"></i>Edit Product
+                    </h1>
+                    <p class="text-gray-600">Update your product information with accurate details</p>
+                </div>
+                <a href="{{ route('vendor.products.index') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Products
+                </a>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        @if (session('success'))
+            <div class="mb-8 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                    <span class="block sm:inline font-medium">{{ session('success') }}</span>
                 </div>
             </div>
-        </nav>
+        @endif
 
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <!-- Page header -->
-            <div class="md:flex md:items-center md:justify-between">
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                        Edit Product
-                    </h2>
-                </div>
-                <div class="mt-4 flex md:mt-0 md:ml-4">
-                    <a href="{{ route('vendor.products.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Back to Products
-                    </a>
-                </div>
-            </div>
-
-            <!-- Form -->
-            <div class="mt-8">
-                <div class="md:grid md:grid-cols-3 md:gap-6">
-                    <div class="md:col-span-1">
-                        <div class="px-4 sm:px-0">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900">Product Information</h3>
-                            <p class="mt-1 text-sm text-gray-600">
-                                Update your product information. Make sure to provide accurate details.
+        <!-- Form -->
+        <form action="{{ route('vendor.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+            @csrf
+            @method('PUT')
+            
+            <!-- Basic Information Card -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    Basic Information
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
+                        <input type="text" name="name" value="{{ old('name', $product->name) }}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300">
+                        @error('name')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
                             </p>
-                        </div>
+                        @enderror
                     </div>
-                    <div class="mt-5 md:mt-0 md:col-span-2">
-                        <form action="{{ route('vendor.products.update', $product) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="shadow sm:rounded-md sm:overflow-hidden">
-                                <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
-                                    <!-- Name -->
-                                    <div>
-                                        <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
-                                        <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                        @error('name')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Description -->
-                                    <div>
-                                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                                        <textarea id="description" name="description" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('description', $product->description) }}</textarea>
-                                        @error('description')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Price -->
-                                    <div>
-                                        <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
-                                        <div class="mt-1 relative rounded-md shadow-sm">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500 sm:text-sm">$</span>
-                                            </div>
-                                            <input type="number" name="price" id="price" step="0.01" min="0" value="{{ old('price', $product->price) }}" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
-                                        </div>
-                                        @error('price')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Stock -->
-                                    <div>
-                                        <label for="stock" class="block text-sm font-medium text-gray-700">Stock</label>
-                                        <input type="number" name="stock" id="stock" min="0" value="{{ old('stock', $product->stock) }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                        @error('stock')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Status -->
-                                    <div>
-                                        <label for="is_active" class="block text-sm font-medium text-gray-700">Status</label>
-                                        <select id="is_active" name="is_active" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                            <option value="1" {{ old('is_active', $product->is_active) ? 'selected' : '' }}>Active</option>
-                                            <option value="0" {{ old('is_active', $product->is_active) ? '' : 'selected' }}>Inactive</option>
-                                        </select>
-                                        @error('is_active')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Image -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Product Image</label>
-                                        @if($product->image)
-                                            <div class="mt-2">
-                                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="h-32 w-32 object-cover rounded-lg">
-                                            </div>
-                                        @endif
-                                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                            <div class="space-y-1 text-center">
-                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                <div class="flex text-sm text-gray-600">
-                                                    <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                                        <span>Upload a file</span>
-                                                        <input id="image" name="image" type="file" class="sr-only" accept="image/*">
-                                                    </label>
-                                                    <p class="pl-1">or drag and drop</p>
-                                                </div>
-                                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
-                                            </div>
-                                        </div>
-                                        @error('image')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Update Product
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Price (UGX)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">UGX</span>
+                            <input type="number" name="price" step="0.01" min="0" value="{{ old('price', $product->price) }}" 
+                                   class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300">
+                        </div>
+                        @error('price')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select name="category" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300">
+                            <option value="ladies" {{ old('category', $product->category) == 'ladies' ? 'selected' : '' }}>Ladies</option>
+                            <option value="gentlemen" {{ old('category', $product->category) == 'gentlemen' ? 'selected' : '' }}>Gentlemen</option>
+                        </select>
+                        @error('category')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
                     </div>
                 </div>
+                
+                <div class="mt-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <textarea name="description" rows="4" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300 resize-none">{{ old('description', $product->description) }}</textarea>
+                    @error('description')
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
+                    @enderror
+                </div>
             </div>
-        </main>
+
+            <!-- Product Details Card -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-tags mr-2 text-purple-600"></i>
+                    Product Details
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Colors</label>
+                        <input type="text" name="color" value="{{ old('color', $product->color) }}" 
+                               placeholder="e.g., Red, Blue, Green"
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-300">
+                        @error('color')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sizes</label>
+                        <input type="text" name="size" value="{{ old('size', $product->size) }}" 
+                               placeholder="e.g., S, M, L, XL"
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-300">
+                        @error('size')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                    <select name="is_active" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-300">
+                        <option value="1" {{ old('is_active', $product->is_active) ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ old('is_active', $product->is_active) ? '' : 'selected' }}>Inactive</option>
+                    </select>
+                    @error('is_active')
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Product Image Card -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-image mr-2 text-green-600"></i>
+                    Product Image
+                </h3>
+                
+                @if($product->image)
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Current Image</label>
+                        <div class="relative inline-block">
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" 
+                                 class="h-32 w-32 object-cover rounded-xl shadow-lg border-2 border-gray-200 cursor-pointer hover:opacity-90 transition-opacity duration-300"
+                                 onclick="openImageModal('{{ asset('storage/' . $product->image) }}', '{{ $product->name }}')">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-eye text-white opacity-0 hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        {{ $product->image ? 'Update Image' : 'Upload Image' }}
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors duration-300">
+                        <div class="space-y-4">
+                            <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-cloud-upload-alt text-green-600 text-2xl"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="image" class="cursor-pointer">
+                                    <span class="text-green-600 hover:text-green-700 font-semibold transition-colors duration-300">
+                                        Click to upload
+                                    </span>
+                                    <span class="text-gray-500"> or drag and drop</span>
+                                </label>
+                                <input id="image" name="image" type="file" class="hidden" accept="image/*">
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    @error('image')
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end space-x-4">
+                <a href="{{ route('vendor.products.index') }}" 
+                   class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-save mr-2"></i>Update Product
+                </button>
+            </div>
+        </form>
     </div>
-</body>
-</html> 
+</div>
+
+<script>
+    // File upload preview
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'h-32 w-32 object-cover rounded-xl shadow-lg border-2 border-gray-200 mt-4';
+                preview.alt = 'Preview';
+                
+                const container = document.querySelector('.border-dashed').parentElement;
+                const existingPreview = container.querySelector('img[alt="Preview"]');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                container.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+@endsection 

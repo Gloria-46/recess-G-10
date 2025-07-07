@@ -6,9 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class OrderController extends Controller
 {
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+        // Share pending orders count with all vendor views
+        view()->composer('layouts.vendor', function ($view) {
+            $pendingOrdersCount = Order::where('vendor_id', auth('vendor')->id())
+                ->where('status', 'pending')
+                ->count();
+            $view->with('pendingOrdersCount', $pendingOrdersCount);
+        });
+    }
+
     public function index()
     {
         $orders = Order::where('vendor_id', Auth::guard('vendor')->id())
@@ -35,7 +49,27 @@ class OrderController extends Controller
 
         $order->update($validated);
 
+        // Always reduce inventory when status is set to completed
+        if ($validated['status'] === 'completed') {
+            $order->load('items.product'); // Reload items and their products
+            foreach ($order->items as $item) {
+                $product = $item->product;
+                if ($product) {
+                    $product->current_stock = max(0, $product->current_stock - $item->quantity);
+                    $product->save();
+                }
+            }
+        }
+
         return redirect()->route('vendor.orders.show', $order)
             ->with('success', 'Order updated successfully.');
+    }
+
+    public function pendingCount()
+    {
+        $count = Order::where('vendor_id', auth('vendor')->id())
+            ->where('status', 'pending')
+            ->count();
+        return response()->json(['count' => $count]);
     }
 }

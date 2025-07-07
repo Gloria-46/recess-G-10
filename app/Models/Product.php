@@ -14,9 +14,12 @@ class Product extends Model
         'name',
         'description',
         'price',
-        'stock',
+        'color',
+        'size',
         'image',
+        'current_stock',
         'is_active',
+        'category',
     ];
 
     protected $casts = [
@@ -32,5 +35,10 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function batches()
+    {
+        return $this->hasMany(ProductBatch::class);
     }
 }

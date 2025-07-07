@@ -1,7 +1,7 @@
-@extends('vendor.layouts.app')
+@extends('layouts.vendor')
 
 @section('header')
-    Orders
+    ORDERS
 @endsection
 
 @section('content')

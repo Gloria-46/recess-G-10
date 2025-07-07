@@ -32,4 +32,21 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password updated successfully.');
     }
+
+    public function update(Request $request)
+    {
+        $vendor = auth('vendor')->user();
+        $request->validate([
+            'business_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:vendors,email,' . $vendor->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+        ]);
+        $vendor->business_name = $request->business_name;
+        $vendor->email = $request->email;
+        $vendor->phone = $request->phone;
+        $vendor->address = $request->address;
+        $vendor->save();
+        return back()->with('success', 'Profile updated successfully.');
+    }
 }

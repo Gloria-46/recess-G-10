@@ -3,148 +3,194 @@
 @section('title', 'Edit Profile - Vendor Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <!-- Page header -->
-    <div class="md:flex md:items-center md:justify-between">
-        <div class="flex-1 min-w-0">
-            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                Edit Profile
-            </h2>
+<div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="mb-4 sm:mb-0">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2 flex items-center">
+                        <i class="fas fa-user-edit mr-3 text-blue-600"></i>Edit Profile
+                    </h1>
+                    <p class="text-gray-600">Update your account information and business details</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-user text-white text-2xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Current User</p>
+                        <p class="font-semibold text-gray-900">{{ $vendor->business_name ?? 'Vendor' }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Flash Messages -->
-    @if (session('success'))
-        <div class="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
-        </div>
-    @endif
+        <!-- Success Message -->
+        @if (session('success'))
+            <div class="mb-8 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                    <span class="block sm:inline font-medium">{{ session('success') }}</span>
+                </div>
+            </div>
+        @endif
 
-    <!-- Profile Form -->
-    <div class="mt-8">
-        <div class="md:grid md:grid-cols-3 md:gap-6">
-            <div class="md:col-span-1">
-                <div class="px-4 sm:px-0">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Profile Information</h3>
-                    <p class="mt-1 text-sm text-gray-600">
-                        Update your account's profile information and email address.
-                    </p>
+        <!-- Error Messages -->
+        @if (session('error'))
+            <div class="mb-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2 text-red-600"></i>
+                    <span class="block sm:inline font-medium">{{ session('error') }}</span>
+                </div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mb-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative" role="alert">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600 mt-0.5"></i>
+                    <div>
+                        <p class="font-medium mb-2">Please fix the following errors:</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Profile Form -->
+        <form action="{{ route('vendor.profile.update') }}" method="POST" class="space-y-8">
+            @csrf
+            @method('PUT')
+
+            <!-- Business Information Card -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-building mr-2 text-blue-600"></i>
+                    Business Information
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Business Name</label>
+                        <input type="text" name="business_name" value="{{ old('business_name', $vendor->business_name) }}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300"
+                               placeholder="Enter your business name">
+                        @error('business_name')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                        <input type="email" name="email" value="{{ old('email', $vendor->email) }}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300"
+                               placeholder="your@email.com">
+                        @error('email')
+                            <p class="mt-2 text-sm text-red-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                    <input type="tel" name="phone" value="{{ old('phone', $vendor->phone) }}" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-300"
+                           placeholder="+256 740 847 026">
+                    @error('phone')
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
+                    @enderror
                 </div>
             </div>
 
-            <div class="mt-5 md:mt-0 md:col-span-2">
-                <form action="{{ route('vendor.profile.update') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="shadow sm:rounded-md sm:overflow-hidden">
-                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                                <div class="mt-1">
-                                    <input type="text" name="name" id="name" value="{{ old('name', $vendor->name) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                                @error('name')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <div class="mt-1">
-                                    <input type="email" name="email" id="email" value="{{ old('email', $vendor->email) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                                @error('email')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                                <div class="mt-1">
-                                    <input type="tel" name="phone" id="phone" value="{{ old('phone', $vendor->phone) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                                @error('phone')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                                <div class="mt-1">
-                                    <textarea id="address" name="address" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ old('address', $vendor->address) }}</textarea>
-                                </div>
-                                @error('address')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Change Password -->
-    <div class="mt-8">
-        <div class="md:grid md:grid-cols-3 md:gap-6">
-            <div class="md:col-span-1">
-                <div class="px-4 sm:px-0">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Change Password</h3>
-                    <p class="mt-1 text-sm text-gray-600">
-                        Ensure your account is using a long, random password to stay secure.
-                    </p>
+            <!-- Address Information Card -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-map-marker-alt mr-2 text-purple-600"></i>
+                    Address Information
+                </h3>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Business Address</label>
+                    <textarea name="address" rows="4" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-300 resize-none"
+                              placeholder="Enter your complete business address">{{ old('address', $vendor->address) }}</textarea>
+                    @error('address')
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
+                    @enderror
                 </div>
             </div>
 
-            <div class="mt-5 md:mt-0 md:col-span-2">
-                <form action="{{ route('vendor.profile.password') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="shadow sm:rounded-md sm:overflow-hidden">
-                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
-                            <div>
-                                <label for="current_password" class="block text-sm font-medium text-gray-700">Current Password</label>
-                                <div class="mt-1">
-                                    <input type="password" name="current_password" id="current_password" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                                @error('current_password')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+            <!-- Account Statistics Card -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-green-600"></i>
+                    Account Overview
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-green-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-box text-green-600"></i>
                             </div>
-
                             <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
-                                <div class="mt-1">
-                                    <input type="password" name="password" id="password" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                                @error('password')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <p class="text-sm text-gray-500">Total Products</p>
+                                <p class="text-lg font-bold text-gray-900">{{ \App\Models\Product::where('vendor_id', $vendor->id)->count() }}</p>
                             </div>
-
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
-                                <div class="mt-1">
-                                    <input type="password" name="password_confirmation" id="password_confirmation" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Update Password
-                            </button>
                         </div>
                     </div>
-                </form>
+                    
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-shopping-cart text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Total Orders</p>
+                                <p class="text-lg font-bold text-gray-900">{{ \App\Models\Order::where('vendor_id', $vendor->id)->count() }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-purple-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar-alt text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Member Since</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $vendor->created_at->format('M Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex justify-end space-x-4">
+                <a href="{{ route('vendor.dashboard') }}" 
+                   class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection 

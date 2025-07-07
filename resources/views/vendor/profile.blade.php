@@ -1,84 +1,40 @@
-@extends('vendor.layouts.app')
+@extends('layouts.vendor')
 
-@section('header')
-    Profile
-@endsection
+@section('title', 'Profile - Vendor Dashboard')
 
 @section('content')
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow">
-            <div class="p-6">
-                <!-- Profile Header -->
-                <div class="flex items-center space-x-6 mb-8">
-                    <div class="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-user text-4xl text-gray-400"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Vendor Name</h2>
-                        <p class="text-gray-600">vendor@example.com</p>
-                    </div>
+<div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg">
+                <i class="fas fa-user text-white text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ $vendor->name ?? 'Vendor Name' }}</h2>
+            <p class="text-gray-500">{{ $vendor->email ?? 'vendor@email.com' }}</p>
+        </div>
+        <form method="POST" action="{{ route('vendor.profile.update') }}" class="space-y-6">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Name</label>
+                    <input type="text" name="name" value="{{ old('name', $vendor->name ?? '') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                 </div>
-
-                <!-- Profile Form -->
-                <form class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Business Name</label>
-                            <input type="text" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Phone</label>
-                            <input type="tel" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Address</label>
-                            <input type="text" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">About</label>
-                        <textarea rows="4" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-
-                    <div class="flex justify-end space-x-4">
-                        <button type="button" class="px-6 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            Cancel
-                        </button>
-                        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            Save Changes
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Security Section -->
-                <div class="mt-12">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Security</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Current Password</label>
-                            <input type="password" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">New Password</label>
-                            <input type="password" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Confirm New Password</label>
-                            <input type="password" class="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="flex justify-end">
-                            <button type="button" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                Update Password
-                            </button>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $vendor->email ?? '') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                 </div>
             </div>
-        </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                <input type="text" name="phone" value="{{ old('phone', $vendor->phone ?? '') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-semibold">
+                    <i class="fas fa-save mr-2"></i>Update Profile
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 @endsection 

@@ -29,17 +29,17 @@
                     </div>
                 @endif
 
-                <form class="space-y-6" action="{{ route('vendor.register') }}" method="POST">
+                <form class="space-y-6" action="{{ route('vendor.register') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div>
-                        <label for="business_name" class="block text-sm font-medium text-gray-700">
+                        <label for="businessName" class="block text-sm font-medium text-gray-700">
                             Business Name
                         </label>
                         <div class="mt-1">
-                            <input id="business_name" name="business_name" type="text" required value="{{ old('business_name') }}" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <input id="businessName" name="businessName" type="text" required value="{{ old('businessName') }}" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         </div>
-                        @error('business_name')
+                        @error('businessName')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -57,13 +57,13 @@
                     </div>
 
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700">
+                        <label for="contact" class="block text-sm font-medium text-gray-700">
                             Phone Number
                         </label>
                         <div class="mt-1">
-                            <input id="phone" name="phone" type="tel" required value="{{ old('phone') }}" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <input id="contact" name="contact" type="tel" required value="{{ old('contact') }}" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         </div>
-                        @error('phone')
+                        @error('contact')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -81,6 +81,18 @@
                     </div>
 
                     <div>
+                        <label for="yearOfEstablishment" class="block text-sm font-medium text-gray-700">
+                            Year of Establishment
+                        </label>
+                        <div class="mt-1">
+                            <input id="yearOfEstablishment" name="yearOfEstablishment" type="number" min="1900" max="{{ date('Y') }}" required value="{{ old('yearOfEstablishment') }}" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        @error('yearOfEstablishment')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">
                             Password
                         </label>
@@ -93,12 +105,51 @@
                     </div>
 
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700">
+                        <label for="passwordConfirmation" class="block text-sm font-medium text-gray-700">
                             Confirm Password
                         </label>
                         <div class="mt-1">
-                            <input id="password_confirmation" name="password_confirmation" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <input id="passwordConfirmation" name="passwordConfirmation" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         </div>
+                        @error('passwordConfirmation')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="applicationForm" class="block text-sm font-medium text-gray-700">
+                            Application Form (PDF, DOC, etc.)
+                        </label>
+                        <div class="mt-1">
+                            <input id="applicationForm" name="applicationForm" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        @error('applicationForm')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="complianceCertificate" class="block text-sm font-medium text-gray-700">
+                            Industrial Compliance Certificate (PDF, DOC, etc.)
+                        </label>
+                        <div class="mt-1">
+                            <input id="complianceCertificate" name="complianceCertificate" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        @error('complianceCertificate')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="bankStatement" class="block text-sm font-medium text-gray-700">
+                            Bank Statement (PDF, DOC, etc.)
+                        </label>
+                        <div class="mt-1">
+                            <input id="bankStatement" name="bankStatement" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        @error('bankStatement')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
