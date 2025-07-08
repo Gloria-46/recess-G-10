@@ -22,9 +22,9 @@ class Authenticate extends Middleware
                 auth()->shouldUse('customer');
                 return route('customer.login');
             }
-            // Otherwise, fallback to vendor login and use vendor guard
-            auth()->shouldUse('vendor');
-            return route('vendor.login');
+            // Otherwise, fallback to retailer login and use retailer guard
+            auth()->shouldUse('retailer');
+            return route('retailer.login');
         }
     }
 } 

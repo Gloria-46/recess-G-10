@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Notifications\CustomerOrderConfirmation;
-use App\Notifications\VendorNewOrder;
+use App\Notifications\RetailerNewOrder;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -41,7 +41,7 @@ class PaymentService
         // Send email to vendor
         $vendor = $order->vendor;
         if ($vendor && $vendor->email) {
-            $vendor->notify(new VendorNewOrder($order));
+            $vendor->notify(new RetailerNewOrder($order));
         }
 
         Log::info('Payment completed and order processed', [

@@ -61,8 +61,13 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         @foreach($products as $product)
-            <div class="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden group">
-                <div class="flex-1 p-6">
+            <div class="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden group relative flex flex-col h-full min-h-[600px]">
+                @if($product->current_stock <= 0)
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-400 text-white text-xs font-bold px-4 py-1 rounded-full shadow z-20">
+                        OUT OF STOCK
+                    </div>
+                @endif
+                <div class="flex-1 p-6 pt-10 flex flex-col">
                     <div class="h-72 w-72 mx-auto flex items-center justify-center mb-4 bg-gradient-to-br from-gray-50 to-white rounded-2xl overflow-hidden border border-gray-100 group-hover:shadow-lg transition-shadow duration-300">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="object-contain h-72 w-72 rounded-2xl bg-white group-hover:scale-105 transition-transform duration-300">
@@ -125,10 +130,12 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-xl w-full mt-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">Add to Cart</button>
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-xl w-full mt-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" @if($product->current_stock <= 0) disabled style="opacity:0.5;cursor:not-allowed;" @endif>
+                            Add to Cart
+                        </button>
                     </form>
                 </div>
-                <a href="{{ route('customer.products.show', $product->id) }}" class="block bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 font-bold py-4 px-6 text-center transition-all duration-300 border-t border-blue-200 hover:shadow-inner group-hover:bg-gradient-to-r group-hover:from-blue-100 group-hover:to-indigo-100">
+                <a href="{{ route('customer.products.show', $product->id) }}" class="block bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 font-bold py-4 px-6 text-center transition-all duration-300 border-t border-blue-200 hover:shadow-inner group-hover:bg-gradient-to-r group-hover:from-blue-100 group-hover:to-indigo-100 mt-auto">
                     <span class="flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

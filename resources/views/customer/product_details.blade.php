@@ -1,7 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
-<div class="max-w-3xl mx-auto py-10">
+<div class="max-w-4xl mx-auto py-10">
     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl shadow-2xl p-10 flex flex-col md:flex-row gap-10 border border-blue-100">
         <div class="md:w-1/3 flex-shrink-0 flex items-center justify-center mb-8 md:mb-0">
             @if($product->image)
@@ -17,7 +17,7 @@
                 </span>
             @endif
         </div>
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
             <h1 class="text-4xl font-bold mb-4 text-blue-900 leading-tight">{{ $product->name }}</h1>
             <p class="text-gray-700 mb-6 text-lg">{{ $product->description }}</p>
             <div class="mb-6">
@@ -48,7 +48,7 @@
             <!-- Bulk Add to Cart Form (Grid Format) -->
             <form action="{{ route('customer.cart.bulkAdd', $product->id) }}" method="POST" class="mt-8">
                 @csrf
-                <div class="overflow-x-auto mb-6">
+                <div class="w-full max-w-full overflow-x-auto mb-6">
                     <table class="min-w-full bg-white rounded-xl shadow border border-gray-200">
                         <thead class="bg-blue-50">
                             <tr>
@@ -76,7 +76,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-8 rounded-xl w-full mt-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg">Add Selected to Cart</button>
+                <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-8 rounded-xl w-full mt-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-lg" @if($product->current_stock <= 0) disabled style="opacity:0.5;cursor:not-allowed;" @endif>Add Selected to Cart</button>
             </form>
         </div>
     </div>

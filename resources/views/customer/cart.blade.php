@@ -31,32 +31,31 @@
                         @php $grandTotal = 0; @endphp
                         @foreach($cartItems as $item)
                             @php
-                                $product = $item->product;
-                                $total = $product ? $product->price * $item->quantity : 0;
+                                $total = $item['price'] * ($item['quantity'] ?? 1);
                                 $grandTotal += $total;
                             @endphp
                             <tr class="border-b last:border-b-0">
                                 <td class="px-6 py-3 align-middle">
-                                    @if($product && $product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="h-12 w-12 object-cover rounded">
+                                    @if(!empty($item['image']))
+                                        <img src="{{ asset('storage/' . $item['image']) }}" alt="{{ $item['name'] }}" class="h-12 w-12 object-cover rounded">
                                     @endif
                                 </td>
-                                <td class="px-6 py-3 align-middle font-semibold text-blue-900">{{ $product->name ?? 'Product not found' }}</td>
-                                <td class="px-6 py-3 align-middle text-right">UGX {{ $product ? number_format($product->price, 2) : '-' }}</td>
-                                <td class="px-6 py-3 align-middle">{{ $item->size ?? '-' }}</td>
-                                <td class="px-6 py-3 align-middle">{{ $item->color ?? '-' }}</td>
+                                <td class="px-6 py-3 align-middle font-semibold text-blue-900">{{ $item['name'] ?? 'Product not found' }}</td>
+                                <td class="px-6 py-3 align-middle text-right">UGX {{ $item['price'] ?? '-' }}</td>
+                                <td class="px-6 py-3 align-middle">{{ $item['size'] ?? '-' }}</td>
+                                <td class="px-6 py-3 align-middle">{{ $item['color'] ?? '-' }}</td>
                                 <td class="px-6 py-3 align-middle text-center">
-                                    <form action="{{ route('customer.cart.update', $item->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('customer.cart.update', $item['id']) }}" method="POST" class="inline">
                                         @csrf
                                         <div class="flex items-center gap-2 justify-center">
-                                            <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" class="w-16 px-2 py-1 border rounded">
+                                            <input type="number" name="quantity" value="{{ $item['quantity'] ?? 1 }}" min="1" class="w-16 px-2 py-1 border rounded">
                                             <button type="submit" class="px-2 py-1 bg-blue-500 text-white rounded">Update</button>
                                         </div>
                                     </form>
                                 </td>
                                 <td class="px-6 py-3 align-middle text-right">UGX {{ number_format($total, 2) }}</td>
                                 <td class="px-6 py-3 align-middle text-center">
-                                    <form action="{{ route('customer.cart.remove', $item->id) }}" method="POST" onsubmit="return confirm('Remove this item from cart?');">
+                                    <form action="{{ route('customer.cart.remove', $item['id']) }}" method="POST" onsubmit="return confirm('Remove this item from cart?');">
                                         @csrf
                                         <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded">Remove</button>
                                     </form>
@@ -88,7 +87,7 @@
                         <label for="shipping_address" class="block font-semibold text-gray-700">Delivery Address</label>
                         <input type="text" name="shipping_address" id="shipping_address" required class="w-full border rounded px-3 py-2">
                     </div>
-                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full font-semibold">Proceed to Payment</button>
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full font-semibold">Confirm Order</button>
                 </form>
             </div>
         @endif

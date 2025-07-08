@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\ValidateSignature;
-use App\Http\Middleware\RedirectIfNotVendor;
+use App\Http\Middleware\RedirectIfNotRetailer;
 
 class Kernel extends HttpKernel
 {
@@ -28,7 +28,7 @@ class Kernel extends HttpKernel
         'signed' => ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'vendor' => RedirectIfNotVendor::class,
+        'retailer' => RedirectIfNotRetailer::class,
         'customer.auth' => \App\Http\Middleware\RedirectIfNotCustomer::class,
     ];
 } 

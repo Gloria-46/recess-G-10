@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->string('batch_no');
-            $table->string('supplier_name')->nullable();
             $table->integer('quantity_added');
             $table->dateTime('received_at');
             $table->timestamps();

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Vendor;
+use App\Models\Retailer;
 use App\Models\Product;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -14,16 +14,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http; // Added for Java server communication
 use Illuminate\Support\Facades\Log; // Added for logging
 
-class VendorController extends Controller
+class RetailerController extends Controller
 {
     /**
-     * Register a new vendor via API
+     * Register a new retailer via API
      */
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'business_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:vendors,email',
+            'email' => 'required|string|email|max:255|unique:retailers,email',
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
@@ -41,18 +41,18 @@ class VendorController extends Controller
         }
 
         try {
-            // Validate with Java server before creating vendor
+            // Validate with Java server before creating retailer
             $javaValidationResult = $this->validateWithJavaServer($request);
             
             if (!$javaValidationResult['success']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Vendor validation failed',
+                    'message' => 'Retailer validation failed',
                     'validation_errors' => $javaValidationResult['errors']
                 ], 422);
             }
 
-            $vendor = Vendor::create([
+            $retailer = Retailer::create([
                 'business_name' => $request->business_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
@@ -68,12 +68,12 @@ class VendorController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Vendor registered successfully',
+                'message' => 'Retailer registered successfully',
                 'data' => [
-                    'vendor_id' => $vendor->id,
-                    'business_name' => $vendor->business_name,
-                    'email' => $vendor->email,
-                    'status' => $vendor->status,
+                    'retailer_id' => $retailer->id,
+                    'business_name' => $retailer->business_name,
+                    'email' => $retailer->email,
+                    'status' => $retailer->status,
                     'validation_result' => $javaValidationResult['data'] ?? null,
                 ]
             ], 201);
@@ -88,13 +88,13 @@ class VendorController extends Controller
     }
 
     /**
-     * Validate vendor data with Java server
+     * Validate retailer data with Java server
      */
     private function validateWithJavaServer(Request $request): array
     {
         try {
             // Configure Java server URL - update this with your actual Java server URL
-            $javaServerUrl = env('SPRING_API_URL', 'http://localhost:8080/api') . '/validate-vendor';
+            $javaServerUrl = env('SPRING_API_URL', 'http://localhost:8080/api') . '/validate-retailer';
             
             $validationData = [
                 'business_name' => $request->business_name,
@@ -137,7 +137,7 @@ class VendorController extends Controller
         } catch (\Exception $e) {
             Log::error('Java validation server error', [
                 'error' => $e->getMessage(),
-                'vendor_data' => $request->only(['business_name', 'email', 'phone', 'address'])
+                'retailer_data' => $request->only(['business_name', 'email', 'phone', 'address'])
             ]);
             
             // If Java server is completely unavailable, continue with registration
@@ -151,40 +151,40 @@ class VendorController extends Controller
     }
 
     /**
-     * Get vendor profile
+     * Get retailer profile
      */
     public function profile(Request $request): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $vendor->id,
-                'business_name' => $vendor->business_name,
-                'email' => $vendor->email,
-                'phone' => $vendor->phone,
-                'address' => $vendor->address,
-                'contact' => $vendor->contact,
-                'year_of_establishment' => $vendor->yearOfEstablishment,
-                'about' => $vendor->about,
-                'status' => $vendor->status,
-                'is_active' => $vendor->is_active,
-                'created_at' => $vendor->created_at,
+                'id' => $retailer->id,
+                'business_name' => $retailer->business_name,
+                'email' => $retailer->email,
+                'phone' => $retailer->phone,
+                'address' => $retailer->address,
+                'contact' => $retailer->contact,
+                'year_of_establishment' => $retailer->yearOfEstablishment,
+                'about' => $retailer->about,
+                'status' => $retailer->status,
+                'is_active' => $retailer->is_active,
+                'created_at' => $retailer->created_at,
             ]
         ]);
     }
 
     /**
-     * Update vendor profile
+     * Update retailer profile
      */
     public function updateProfile(Request $request): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
         $validator = Validator::make($request->all(), [
             'business_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255|unique:vendors,email,' . $vendor->id,
+            'email' => 'sometimes|email|max:255|unique:retailers,email,' . $retailer->id,
             'phone' => 'sometimes|string|max:20',
             'address' => 'sometimes|string',
             'contact' => 'sometimes|string|max:20',
@@ -200,7 +200,7 @@ class VendorController extends Controller
             ], 422);
         }
 
-        $vendor->update($request->only([
+        $retailer->update($request->only([
             'business_name', 'email', 'phone', 'address', 
             'contact', 'yearOfEstablishment', 'about'
         ]));
@@ -209,28 +209,28 @@ class VendorController extends Controller
             'success' => true,
             'message' => 'Profile updated successfully',
             'data' => [
-                'id' => $vendor->id,
-                'business_name' => $vendor->business_name,
-                'email' => $vendor->email,
-                'phone' => $vendor->phone,
-                'address' => $vendor->address,
-                'contact' => $vendor->contact,
-                'year_of_establishment' => $vendor->yearOfEstablishment,
-                'about' => $vendor->about,
-                'status' => $vendor->status,
-                'is_active' => $vendor->is_active,
+                'id' => $retailer->id,
+                'business_name' => $retailer->business_name,
+                'email' => $retailer->email,
+                'phone' => $retailer->phone,
+                'address' => $retailer->address,
+                'contact' => $retailer->contact,
+                'year_of_establishment' => $retailer->yearOfEstablishment,
+                'about' => $retailer->about,
+                'status' => $retailer->status,
+                'is_active' => $retailer->is_active,
             ]
         ]);
     }
 
     /**
-     * Get vendor products
+     * Get retailer products
      */
     public function getProducts(Request $request): JsonResponse
     {
-        $products = Product::with('vendor')
-            ->when($request->vendor_id, function($query, $vendorId) {
-                return $query->where('vendor_id', $vendorId);
+        $products = Product::with('retailer')
+            ->when($request->retailer_id, function($query, $retailerId) {
+                return $query->where('retailer_id', $retailerId);
             })
             ->where('is_active', true)
             ->paginate(20);
@@ -246,7 +246,7 @@ class VendorController extends Controller
      */
     public function createProduct(Request $request): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -268,7 +268,7 @@ class VendorController extends Controller
         }
 
         $data = $request->all();
-        $data['vendor_id'] = $vendor->id;
+        $data['retailer_id'] = $retailer->id;
         $data['is_active'] = true;
 
         if ($request->hasFile('image')) {
@@ -290,10 +290,10 @@ class VendorController extends Controller
      */
     public function updateProduct(Request $request, Product $product): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
-        // Check if vendor owns this product
-        if ($product->vendor_id !== $vendor->id) {
+        // Check if retailer owns this product
+        if ($product->retailer_id !== $retailer->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
@@ -344,10 +344,10 @@ class VendorController extends Controller
      */
     public function deleteProduct(Request $request, Product $product): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
-        // Check if vendor owns this product
-        if ($product->vendor_id !== $vendor->id) {
+        // Check if retailer owns this product
+        if ($product->retailer_id !== $retailer->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
@@ -368,14 +368,14 @@ class VendorController extends Controller
     }
 
     /**
-     * Get vendor orders
+     * Get retailer orders
      */
     public function getOrders(Request $request): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
         $orders = Order::with(['items.product', 'user'])
-            ->where('vendor_id', $vendor->id)
+            ->where('retailer_id', $retailer->id)
             ->when($request->status, function($query, $status) {
                 return $query->where('status', $status);
             })
@@ -393,9 +393,9 @@ class VendorController extends Controller
      */
     public function getOrder(Request $request, Order $order): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
-        if ($order->vendor_id !== $vendor->id) {
+        if ($order->retailer_id !== $retailer->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
@@ -415,9 +415,9 @@ class VendorController extends Controller
      */
     public function updateOrderStatus(Request $request, Order $order): JsonResponse
     {
-        $vendor = $request->user();
+        $retailer = $request->user();
         
-        if ($order->vendor_id !== $vendor->id) {
+        if ($order->retailer_id !== $retailer->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'

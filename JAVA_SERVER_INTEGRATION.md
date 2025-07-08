@@ -1,7 +1,6 @@
-# Java Server Integration Guide
+# Java Server Integration
 
-## Overview
-Your Laravel application now includes integration with your Java validation server during the vendor registration process. The system will call your Java server to validate vendor criteria before completing the registration.
+Retailer registration and validation via Java server is no longer supported. Retailers must be created by an administrator in the Laravel application.
 
 ## Configuration
 

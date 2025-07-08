@@ -1,7 +1,7 @@
-# Uptrend Clothing Store - Vendor API Documentation
+# Uptrend Clothing Store - Retailer API Documentation
 
 ## Overview
-This API provides endpoints for vendor registration, authentication, and management for the Uptrend Clothing Store system. The API is designed to integrate with Java-based applications and other external systems.
+This API provides endpoints for retailer authentication and management for the Uptrend Clothing Store system. Registration is not available via API; retailers must be created by an administrator.
 
 ## Base URL
 ```
@@ -17,57 +17,11 @@ Authorization: Bearer {your-token}
 
 ## Endpoints
 
-### 1. Vendor Registration
+### 1. Retailer Login
 
-**POST** `/api/vendor/register`
+**POST** `/api/retailer/login`
 
-Register a new vendor account.
-
-#### Request Body
-```json
-{
-    "business_name": "Fashion Store Ltd",
-    "email": "vendor@example.com",
-    "password": "securepassword123",
-    "phone": "+256700000000",
-    "address": "Kampala, Uganda",
-    "contact": "+256700000000",
-    "year_of_establishment": 2020,
-    "about": "We specialize in trendy clothing for all ages"
-}
-```
-
-#### Response (Success - 201)
-```json
-{
-    "success": true,
-    "message": "Vendor registered successfully",
-    "data": {
-        "vendor_id": 1,
-        "business_name": "Fashion Store Ltd",
-        "email": "vendor@example.com",
-        "status": "pending"
-    }
-}
-```
-
-#### Response (Error - 422)
-```json
-{
-    "success": false,
-    "message": "Validation failed",
-    "errors": {
-        "email": ["The email has already been taken."],
-        "password": ["The password must be at least 8 characters."]
-    }
-}
-```
-
-### 2. Vendor Login
-
-**POST** `/api/vendor/login`
-
-Authenticate a vendor and receive an access token.
+Authenticate a retailer and receive an access token.
 
 #### Request Body
 ```json
@@ -83,7 +37,7 @@ Authenticate a vendor and receive an access token.
     "success": true,
     "message": "Login successful",
     "data": {
-        "vendor": {
+        "retailer": {
             "id": 1,
             "business_name": "Fashion Store Ltd",
             "email": "vendor@example.com",
@@ -104,11 +58,11 @@ Authenticate a vendor and receive an access token.
 }
 ```
 
-### 3. Get Current Vendor
+### 2. Get Current Retailer
 
-**GET** `/api/vendor/me`
+**GET** `/api/retailer/me`
 
-Get the current authenticated vendor's information.
+Get the current authenticated retailer's information.
 
 #### Headers
 ```
@@ -135,11 +89,11 @@ Authorization: Bearer {token}
 }
 ```
 
-### 4. Update Vendor Profile
+### 3. Update Retailer Profile
 
-**PUT** `/api/vendor/profile`
+**PUT** `/api/retailer/profile`
 
-Update the current vendor's profile information.
+Update the current retailer's profile information.
 
 #### Headers
 ```
@@ -176,11 +130,11 @@ Authorization: Bearer {token}
 }
 ```
 
-### 5. Vendor Logout
+### 4. Retailer Logout
 
-**POST** `/api/vendor/logout`
+**POST** `/api/retailer/logout`
 
-Logout the current vendor and invalidate the token.
+Logout the current retailer and invalidate the token.
 
 #### Headers
 ```

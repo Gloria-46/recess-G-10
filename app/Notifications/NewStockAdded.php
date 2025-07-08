@@ -34,7 +34,7 @@ class NewStockAdded extends Notification implements ShouldQueue
             ->line('Batch No: ' . $this->batch->batch_no)
             ->line('Quantity Added: ' . $this->batch->quantity_added)
             ->line('Received At: ' . $this->batch->received_at->format('Y-m-d H:i'))
-            ->action('View Inventory', url(route('vendor.inventory')))
+            ->action('View Inventory', url(route('retailer.inventory')))
             ->line('Thank you for using our application!');
     }
 

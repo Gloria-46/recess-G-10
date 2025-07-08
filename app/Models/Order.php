@@ -10,7 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'vendor_id',
+        'retailer_id',
         'user_id',
         'order_number',
         'customer_name',
@@ -26,9 +26,9 @@ class Order extends Model
         'total_amount' => 'decimal:2',
     ];
 
-    public function vendor()
+    public function retailer()
     {
-        return $this->belongsTo(Vendor::class);
+        return $this->belongsTo(Retailer::class, 'retailer_id');
     }
 
     public function items()

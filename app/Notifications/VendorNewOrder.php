@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class VendorNewOrder extends Notification
+class RetailerNewOrder extends Notification
 {
     use Queueable;
 
@@ -38,7 +38,7 @@ class VendorNewOrder extends Notification
     {
         return (new MailMessage)
             ->subject('New Order Received')
-            ->greeting('Hello ' . ($notifiable->business_name ?? 'Vendor') . '!')
+            ->greeting('Hello ' . ($notifiable->business_name ?? 'Retailer') . '!')
             ->line('You have received a new order (Order #: ' . $this->order->order_number . ') from ' . $this->order->customer_name . '.')
             ->line('Please check your dashboard for details.');
     }

@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\RetailerController;
 use App\Http\Controllers\Api\AuthController;
 
 /*
@@ -20,27 +20,26 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Vendor Registration API
-Route::prefix('vendor')->group(function () {
-    Route::post('/register', [VendorController::class, 'register']);
+// Retailer Registration API
+Route::prefix('retailer')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
-    Route::get('/profile', [VendorController::class, 'profile'])->middleware('auth:sanctum');
-    Route::put('/profile', [VendorController::class, 'updateProfile'])->middleware('auth:sanctum');
+    Route::get('/profile', [RetailerController::class, 'profile'])->middleware('auth:sanctum');
+    Route::put('/profile', [RetailerController::class, 'updateProfile'])->middleware('auth:sanctum');
 });
 
 // Product API
 Route::prefix('products')->group(function () {
-    Route::get('/', [VendorController::class, 'getProducts']);
-    Route::post('/', [VendorController::class, 'createProduct'])->middleware('auth:sanctum');
-    Route::put('/{product}', [VendorController::class, 'updateProduct'])->middleware('auth:sanctum');
-    Route::delete('/{product}', [VendorController::class, 'deleteProduct'])->middleware('auth:sanctum');
+    Route::get('/', [RetailerController::class, 'getProducts']);
+    Route::post('/', [RetailerController::class, 'createProduct'])->middleware('auth:sanctum');
+    Route::put('/{product}', [RetailerController::class, 'updateProduct'])->middleware('auth:sanctum');
+    Route::delete('/{product}', [RetailerController::class, 'deleteProduct'])->middleware('auth:sanctum');
 });
 
 // Order API
 Route::prefix('orders')->group(function () {
-    Route::get('/', [VendorController::class, 'getOrders'])->middleware('auth:sanctum');
-    Route::get('/{order}', [VendorController::class, 'getOrder'])->middleware('auth:sanctum');
-    Route::put('/{order}/status', [VendorController::class, 'updateOrderStatus'])->middleware('auth:sanctum');
+    Route::get('/', [RetailerController::class, 'getOrders'])->middleware('auth:sanctum');
+    Route::get('/{order}', [RetailerController::class, 'getOrder'])->middleware('auth:sanctum');
+    Route::put('/{order}/status', [RetailerController::class, 'updateOrderStatus'])->middleware('auth:sanctum');
 }); 

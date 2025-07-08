@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'vendor_id',
+        'retailer_id',
         'name',
         'description',
         'price',
@@ -27,9 +27,9 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    public function vendor()
+    public function retailer()
     {
-        return $this->belongsTo(Vendor::class);
+        return $this->belongsTo(Retailer::class);
     }
 
     public function orderItems()
@@ -40,5 +40,10 @@ class Product extends Model
     public function batches()
     {
         return $this->hasMany(ProductBatch::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\OrderItem::class, 'product_id');
     }
 }

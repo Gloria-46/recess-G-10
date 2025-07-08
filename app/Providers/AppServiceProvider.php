@@ -20,11 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share low stock inventories with all views for vendor
+        // Share low stock inventories with all views for retailer
         view()->composer('*', function ($view) {
-            if (auth('vendor')->check()) {
-                $vendor = auth('vendor')->user();
-                $products = \App\Models\Product::where('vendor_id', $vendor->id)->get();
+            if (auth('retailer')->check()) {
+                $retailer = auth('retailer')->user();
+                $products = \App\Models\Product::where('retailer_id', $retailer->id)->get();
                 $low_stock_inventories = $products->filter(function ($product) {
                     return ($product->current_stock ?? 0) <= 5;
                 });
@@ -32,10 +32,10 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        View::composer('layouts.vendor', function ($view) {
+        View::composer('layouts.retailer', function ($view) {
             $pending = 0;
-            if (auth('vendor')->check()) {
-                $pending = \App\Models\Order::where('vendor_id', auth('vendor')->id())
+            if (auth('retailer')->check()) {
+                $pending = \App\Models\Order::where('retailer_id', auth('retailer')->id())
                     ->where('status', 'pending')
                     ->count();
             }

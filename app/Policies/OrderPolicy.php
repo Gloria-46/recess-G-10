@@ -3,20 +3,20 @@
 namespace App\Policies;
 
 use App\Models\Order;
-use App\Models\Vendor;
+use App\Models\Retailer;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrderPolicy
 {
     use HandlesAuthorization;
 
-    public function view(Vendor $vendor, Order $order)
+    public function view(Retailer $retailer, Order $order)
     {
-        return $vendor->id === $order->vendor_id;
+        return $retailer->id === $order->retailer_id;
     }
 
-    public function update(Vendor $vendor, Order $order)
+    public function update(Retailer $retailer, Order $order)
     {
-        return $vendor->id === $order->vendor_id;
+        return $retailer->id === $order->retailer_id;
     }
 } 
