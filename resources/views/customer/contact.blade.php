@@ -1,6 +1,7 @@
 @extends('layouts.customer')
 
 @section('content')
+    @php $user = auth('customer')->user(); @endphp
     <div class="max-w-2xl mx-auto py-8">
         <div class="bg-white rounded-2xl shadow p-8">
             <h1 class="text-3xl font-bold mb-6 text-blue-900">Contact Us</h1>
@@ -11,11 +12,11 @@
                 @csrf
                 <div class="mb-4">
                     <label class="block font-semibold text-gray-700">Your Name</label>
-                    <input type="text" name="name" class="w-full border rounded px-3 py-2" placeholder="Enter your name" required>
+                    <input type="text" name="name" class="w-full border rounded px-3 py-2" placeholder="Enter your name" value="{{ $user->name ?? '' }}" @if($user) readonly @endif required>
                 </div>
                 <div class="mb-4">
                     <label class="block font-semibold text-gray-700">Your Email</label>
-                    <input type="email" name="email" class="w-full border rounded px-3 py-2" placeholder="Enter your email" required>
+                    <input type="email" name="email" class="w-full border rounded px-3 py-2" placeholder="Enter your email" value="{{ $user->email ?? '' }}" @if($user) readonly @endif required>
                 </div>
                 <div class="mb-4">
                     <label class="block font-semibold text-gray-700">Message</label>

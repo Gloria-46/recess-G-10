@@ -5,6 +5,11 @@
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-10">
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <form method="GET" action="{{ route('retailer.analytics') }}" class="mb-6 flex items-center gap-4">
+            <label for="month" class="font-semibold text-blue-900">Select Month:</label>
+            <input type="month" id="month" name="month" value="{{ request('month', now()->format('Y-m')) }}" class="border rounded px-3 py-2">
+            <button type="submit" class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Filter</button>
+        </form>
         <div id="analytics-animate" class="opacity-0 translate-y-8 transition-all duration-700">
             <!-- Header Section -->
             <div class="mb-8 flex flex-col items-center justify-center">
@@ -108,37 +113,170 @@
             </div>
 
             <!-- Sales Per Product Table -->
-            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-12">
-                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <i class="fas fa-box text-green-600"></i> Sales Per Product (Stock Sold)
-                </h3>
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-box text-green-600 mr-2"></i>
+                    Sales Per Product (Stock Sold)
+                </h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gradient-to-r from-blue-50 to-purple-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Units Sold</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock Remaining</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Revenue</th>
+                    <table class="min-w-full w-full text-sm text-left">
+                        <thead>
+                            <tr class="bg-blue-50 text-blue-900">
+                                <th class="px-4 py-3 font-semibold">Product</th>
+                                <th class="px-4 py-3 font-semibold">Units Sold</th>
+                                <th class="px-4 py-3 font-semibold">Stock Remaining</th>
+                                <th class="px-4 py-3 font-semibold">Revenue</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse($salesPerProduct as $row)
-                                <tr class="hover:bg-blue-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{{ $row['name'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-700">{{ $row['sold'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">{{ $row['stock_remaining'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700">UGX {{ number_format($row['revenue'], 0) }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-gray-400">No sales data available.</td>
-                                </tr>
-                            @endforelse
+                        <tbody>
+                            @foreach($salesPerProduct as $product)
+                            <tr class="@if($loop->even) bg-blue-50 @endif hover:bg-blue-100 transition">
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ $product['name'] }}</td>
+                                <td class="px-4 py-3 font-bold text-green-700">{{ $product['sold'] }}</td>
+                                <td class="px-4 py-3 font-bold text-blue-900">{{ $product['stock_remaining'] }}</td>
+                                <td class="px-4 py-3 font-bold text-blue-700">
+                                    UGX {{ number_format($product['revenue'], 0) }}
+                                </td>
+                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            <h2 class="text-xl font-bold mt-8 mb-2">Weekly Demand Forecast (Next 12 Weeks)</h2>
+            <form method="GET" action="" class="mb-4">
+                <label for="product_id" class="font-semibold">Select Product:</label>
+                <select name="product_id" id="product_id" class="border rounded px-2 py-1" onchange="this.form.submit()">
+                    <option value="">All Products (Overall Demand)</option>
+                    @foreach($products as $product)
+                        <option value="{{ $product->id }}" @if($selected_product_id == $product->id) selected @endif>
+                            {{ $product->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+            @if($selected_product_id)
+                <h3 class="text-lg font-semibold mb-2">Forecast for: {{ $products->where('id', $selected_product_id)->first()->name ?? 'Product' }}</h3>
+            @endif
+            @if(isset($forecasts) && count($forecasts))
+                <table class="min-w-full bg-white border mb-4">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 border">Week Ending</th>
+                            <th class="px-4 py-2 border">Predicted Demand</th>
+                            <th class="px-4 py-2 border">Lower Bound</th>
+                            <th class="px-4 py-2 border">Upper Bound</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($forecasts as $forecast)
+                        <tr>
+                            <td class="border px-4 py-2">{{ $forecast->forecast_date }}</td>
+                            <td class="border px-4 py-2">{{ number_format($forecast->predicted_sales) }}</td>
+                            <td class="border px-4 py-2">{{ number_format($forecast->lower_bound) }}</td>
+                            <td class="border px-4 py-2">{{ number_format($forecast->upper_bound) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <canvas id="forecastChart" height="100"></canvas>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    const forecastLabels = @json(collect($forecasts)->pluck('forecast_date'));
+                    const forecastData = @json(collect($forecasts)->pluck('predicted_sales'));
+                    const lowerData = @json(collect($forecasts)->pluck('lower_bound'));
+                    const upperData = @json(collect($forecasts)->pluck('upper_bound'));
+                    const ctx = document.getElementById('forecastChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: forecastLabels,
+                            datasets: [
+                                {
+                                    label: 'Predicted Demand',
+                                    data: forecastData,
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.15)',
+                                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                                    pointRadius: 4,
+                                    fill: true,
+                                    tension: 0.3,
+                                    order: 1,
+                                },
+                                {
+                                    label: 'Lower Bound',
+                                    data: lowerData,
+                                    borderColor: 'rgba(255, 99, 132, 0.5)',
+                                    backgroundColor: 'rgba(255, 99, 132, 0.08)',
+                                    borderDash: [5,5],
+                                    fill: '-1',
+                                    pointRadius: 0,
+                                    tension: 0.3,
+                                    order: 2,
+                                },
+                                {
+                                    label: 'Upper Bound',
+                                    data: upperData,
+                                    borderColor: 'rgba(75, 192, 192, 0.5)',
+                                    backgroundColor: 'rgba(75, 192, 192, 0.08)',
+                                    borderDash: [5,5],
+                                    fill: '-1',
+                                    pointRadius: 0,
+                                    tension: 0.3,
+                                    order: 2,
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Weekly Demand Forecast (Next 12 Weeks)' },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) label += ': ';
+                                            if (context.parsed.y !== null) {
+                                                label += context.parsed.y.toLocaleString('en-US') + ' units';
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: { display: true, text: 'Units Sold' },
+                                    grid: { display: true }
+                                },
+                                x: {
+                                    title: { display: true, text: 'Week Ending' },
+                                    grid: { display: true },
+                                    ticks: {
+                                        callback: function(value, index, ticks) {
+                                            // Format date as e.g. 'Jul 14'
+                                            const date = new Date(this.getLabelForValue(value));
+                                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                </script>
+            @else
+                <p>No forecast data available.</p>
+            @endif
         </div>
     </div>
 </div>

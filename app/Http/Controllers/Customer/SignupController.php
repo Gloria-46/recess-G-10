@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-// use Illuminate\Support\Facades\Auth; // Not needed, using fully qualified name
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Notifications\CustomerWelcome;
 
@@ -33,14 +33,14 @@ class SignupController extends Controller
         // Send welcome/confirmation email
         $user->notify(new CustomerWelcome());
 
-        \Illuminate\Support\Facades\Auth::guard('customer')->login($user);
+        Auth::guard('customer')->login($user);
 
         return redirect()->route('customer.home')->with('success', 'Registration successful!');
     }
 
     public function logout(Request $request)
     {
-        \Auth::logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('customer.home')->with('success', 'You have been logged out successfully!');

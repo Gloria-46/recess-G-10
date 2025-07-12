@@ -150,7 +150,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <div class="relative group ml-4">
-                            <a href="{{ route('retailer.profile.edit') }}" class="relative focus:outline-none p-2 rounded-lg hover:bg-white/10 transition-colors">
+                            <a href="{{ route('retailer.profile.show') }}" class="relative focus:outline-none p-2 rounded-lg hover:bg-white/10 transition-colors">
                                 <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                                     <i class="fas fa-user text-white"></i>
                                 </div>

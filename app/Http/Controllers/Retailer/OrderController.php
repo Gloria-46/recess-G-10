@@ -49,15 +49,6 @@ class OrderController extends Controller
 
         $order->update($validated);
 
-        // Update payment_status based on order status
-        if ($validated['status'] === 'completed') {
-            $order->payment_status = 'paid';
-            $order->save();
-        } elseif ($validated['status'] === 'pending') {
-            $order->payment_status = 'pending';
-            $order->save();
-        }
-
         // Always reduce inventory when status is set to completed
         if ($validated['status'] === 'completed') {
             $order->load('items.product'); // Reload items and their products

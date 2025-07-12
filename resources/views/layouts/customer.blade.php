@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Customer Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .slide-up-fade-in {
@@ -79,6 +79,28 @@
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
+
+        .nav-underline {
+            position: relative;
+        }
+        .nav-underline::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 4px;
+            background: #fff;
+            border-radius: 2px;
+            width: 0;
+            opacity: 0;
+            transition: width 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s;
+        }
+        .nav-underline.active::after,
+        .nav-underline:hover::after {
+            width: 100%;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen bg-pattern">
@@ -89,84 +111,77 @@
         <div class="floating-shape"></div>
     </div>
     
-    <nav class="bg-[#23235b] shadow-lg mb-4 glass-effect relative z-50" aria-label="Main Navigation">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-8 w-full">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-tshirt text-white text-xl"></i>
-                    </div>
-                    <span class="font-bold text-2xl text-white tracking-wide">UPTREND CLOTHING</span>
-                </div>
-                <div class="flex items-center gap-6 ml-8 relative h-12">
-                    {{-- Navigation Links with underline and improved UX --}}
+    <nav class="bg-[#23235b] shadow-2xl mb-4 glass-effect sticky top-0 z-50 h-20 backdrop-blur-lg bg-opacity-80 border-b border-blue-200/30 transition-all duration-300" aria-label="Main Navigation">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
+            <!-- Only UPTREND on the left -->
+            <div class="flex items-center flex-shrink-0">
+                <span class="font-extrabold text-3xl text-white tracking-wider drop-shadow-lg">UPTREND</span>
+            </div>
+            <!-- Menu Items -->
+            <div class="flex-1 flex justify-center">
+                <div class="flex flex-nowrap items-center gap-2 md:gap-4">
                     @php
                         $navLinks = [
                             ['route' => 'customer.home', 'icon' => 'fa-home', 'label' => 'HOME'],
                             ['route' => 'customer.products', 'icon' => 'fa-box', 'label' => 'PRODUCT', 'extra' => ['customer.products.show']],
+                            ['dropdown' => true, 'icon' => 'fa-th-large', 'label' => 'CATEGORIES', 'items' => [
+                                ['route' => 'customer.products', 'label' => 'ALL PRODUCTS'],
+                                ['route' => 'customer.products', 'label' => 'GENTLEMEN', 'params' => ['category' => 'gentlemen']],
+                                ['route' => 'customer.products', 'label' => 'LADIES', 'params' => ['category' => 'ladies']],
+                            ]],
                             ['route' => 'customer.cart', 'icon' => 'fa-shopping-cart', 'label' => 'CART'],
                             ['route' => 'customer.about', 'icon' => 'fa-info-circle', 'label' => 'ABOUT'],
                         ];
                     @endphp
                     @foreach($navLinks as $link)
-                        @php
-                            $isActive = request()->routeIs($link['route']) || (isset($link['extra']) && collect($link['extra'])->contains(fn($r) => request()->routeIs($r)));
-                        @endphp
-                        <div class="relative h-12 flex items-center" x-data="{hovered: false}">
-                            <a href="{{ route($link['route']) }}"
-                               class="flex items-center gap-2 text-white font-medium transition px-2 h-full whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30 {{ $isActive ? 'text-blue-200' : 'hover:text-blue-300' }}"
-                               @mouseenter="hovered = true" @mouseleave="hovered = false"
-                               aria-label="{{ $link['label'] }}">
-                                <i class="fas {{ $link['icon'] }}"></i> {{ $link['label'] }}
-                            </a>
-                            <div class="absolute left-0 right-0 bottom-0 h-1 bg-blue-500 transition-all duration-300"
-                                 :style="(hovered || {{ $isActive ? 'true' : 'false' }}) ? 'width:100%;opacity:1;' : 'width:0;opacity:0;'">
+                        @if(isset($link['dropdown']) && $link['dropdown'])
+                            <div class="relative group flex items-center h-full">
+                                <button type="button" class="flex items-center h-full px-4 py-2 rounded-xl transition-all duration-200 text-white text-lg gap-2 nav-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30 group-hover:bg-white/10 group-hover:text-yellow-200">
+                                    <i class="fas {{ $link['icon'] }}"></i> {{ $link['label'] }} <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                </button>
+                                <div class="absolute left-0 mt-14 min-w-[180px] bg-[#23235b] rounded-xl shadow-xl z-50 py-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 border border-blue-900">
+                                    @foreach($link['items'] as $item)
+                                        <a href="{{ isset($item['params']) ? route($item['route'], $item['params']) : route($item['route']) }}" class="block px-6 py-3 text-white hover:bg-blue-900 hover:text-yellow-300 transition text-base whitespace-nowrap">{{ $item['label'] }}</a>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="flex items-center h-full">
+                                <a href="{{ route($link['route']) }}"
+                                   class="flex items-center h-full px-4 py-2 rounded-xl transition-all duration-200 {{ (request()->routeIs($link['route']) || (isset($link['extra']) && collect($link['extra'])->contains(fn($r) => request()->routeIs($r)))) ? 'bg-white/20 text-yellow-300 font-bold shadow-inner' : 'hover:bg-white/10 hover:text-yellow-200 text-white' }} text-lg gap-2 nav-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30"
+                                   aria-label="{{ $link['label'] }}">
+                                    <i class="fas {{ $link['icon'] }}"></i> {{ $link['label'] }}
+                                </a>
+                            </div>
+                        @endif
                     @endforeach
-                    <div id="categories-trigger" class="relative h-12 flex items-center cursor-pointer">
-                        <button id="categories-btn" class="flex items-center gap-2 text-white hover:text-blue-300 font-medium transition px-2 h-full whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30" aria-haspopup="true" aria-expanded="false" aria-label="Categories">
-                            <i class="fas fa-tags"></i> CATEGORIES
-                            <i class="fas fa-chevron-down text-xs transition-transform"></i>
-                        </button>
-                        <div id="categories-dropdown" class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-0 border border-blue-200 max-h-96 overflow-y-auto ring-2 ring-blue-100 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50" style="display:none; position:absolute; left:0; top:100%; min-width:220px; z-index:99999; pointer-events:auto;">
-                            <div class="px-5 py-3 text-xs font-semibold text-blue-700 tracking-widest uppercase bg-blue-50 rounded-t-2xl border-b border-blue-200">Browse Categories</div>
-                            <a href="{{ route('customer.products') }}" class="block px-7 py-4 text-blue-900 text-lg font-bold hover:bg-blue-100 hover:text-blue-800 hover:border-l-4 hover:border-blue-500 transition rounded-none border-b border-blue-50 flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="All Products">
-                                <i class="fas fa-th-large text-blue-500"></i> ALL PRODUCTS
-                            </a>
-                            <a href="{{ route('customer.products', ['category' => 'ladies']) }}" class="block px-7 py-4 text-pink-900 text-lg font-bold hover:bg-pink-100 hover:text-pink-700 hover:border-l-4 hover:border-pink-500 transition rounded-none border-b border-blue-50 flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400" aria-label="Ladies">
-                                <i class="fas fa-female text-pink-500"></i> LADIES
-                            </a>
-                            <a href="{{ route('customer.products', ['category' => 'gentlemen']) }}" class="block px-7 py-4 text-blue-900 text-lg font-bold hover:bg-blue-100 hover:text-blue-800 hover:border-l-4 hover:border-blue-500 transition rounded-b-2xl flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Gentlemen">
-                                <i class="fas fa-male text-blue-500"></i> GENTLEMEN
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-x-2 relative h-12" x-data="{ openProfileDropdown: false }">
+            <!-- Profile/Logout -->
+            <div class="flex items-center gap-x-4 relative h-12 flex-shrink-0" x-data="{ openProfileDropdown: false }">
                 @if(!Auth::guard('customer')->check())
-                    <div class="flex items-center h-12 gap-2 whitespace-nowrap">
-                        <a href="{{ route('customer.signup') }}" class="flex items-center gap-2 text-white hover:text-blue-300 font-medium transition h-full whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30" aria-label="Sign Up"><i class="fas fa-user-plus"></i> Sign Up</a>
-                        <a href="{{ route('customer.login') }}" class="flex items-center gap-2 text-white hover:text-blue-300 font-medium transition h-full whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30" aria-label="Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <div class="flex items-center h-12 gap-3 whitespace-nowrap">
+                        <a href="{{ route('customer.signup') }}" class="flex items-center gap-2 text-white hover:text-yellow-200 font-medium transition h-full whitespace-nowrap px-3 py-2 rounded-xl hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Sign Up"><i class="fas fa-user-plus"></i> Sign Up</a>
+                        <a href="{{ route('customer.login') }}" class="flex items-center gap-2 text-white hover:text-yellow-200 font-medium transition h-full whitespace-nowrap px-3 py-2 rounded-xl hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Login"><i class="fas fa-sign-in-alt"></i> Login</a>
                     </div>
                 @else
-                    <div class="flex items-center h-12 gap-2 whitespace-nowrap">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2" @click="openProfileDropdown = !openProfileDropdown" title="Profile" tabindex="0" aria-label="Profile">
-                            <i class="fas fa-user text-white"></i>
-                        </div>
-                        <div x-show="openProfileDropdown" @click.away="openProfileDropdown = false" class="absolute right-0 mt-12 w-48 bg-white rounded-xl shadow-lg z-50 p-2" style="display: none;" x-transition>
-                            <a href="{{ route('customer.profile') }}" class="mr-2 block px-4 py-2 text-gray-800 hover:bg-blue-100 rounded transition flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Profile"><i class="fas fa-user"></i> Profile</a>
-                            <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 rounded transition flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Order History"><i class="fas fa-history"></i> Order History</a>
+                    <div class="flex items-center h-12 gap-3 whitespace-nowrap">
+                        <button type="button" class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" @click="openProfileDropdown = !openProfileDropdown" title="Profile" tabindex="0" aria-label="Profile">
+                            <i class="fas fa-user text-white text-lg"></i>
+                        </button>
+                        <div x-show="openProfileDropdown" @click.away="openProfileDropdown = false" class="absolute right-0 mt-14 w-56 bg-white rounded-xl shadow-2xl z-50 p-3 border border-blue-100 animate-fade-in-up" style="display: none;" x-transition>
+                            <a href="{{ route('customer.profile') }}" class="block px-4 py-2 text-gray-800 hover:bg-blue-50 rounded transition flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Profile"><i class="fas fa-user"></i> Profile</a>
+                            <a href="{{ route('customer.orders') }}" class="block px-4 py-2 text-gray-800 hover:bg-blue-50 rounded transition flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Order History"><i class="fas fa-history"></i> Order History</a>
                         </div>
                         <form action="{{ route('customer.logout') }}" method="POST" class="inline h-full flex items-center">
                             @csrf
-                            <button type="submit" class="flex items-center gap-2 text-white hover:text-blue-300 font-medium transition h-full whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:bg-blue-900/30" aria-label="Log Out"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                            <button type="submit" class="flex items-center gap-2 text-white hover:text-yellow-200 font-medium transition h-full whitespace-nowrap px-3 py-2 rounded-xl hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Log Out"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                         </form>
                     </div>
                 @endif
             </div>
         </div>
+        <div class="absolute left-0 right-0 bottom-0 h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-40"></div>
     </nav>
 
     @if(!empty($showSearchBar))

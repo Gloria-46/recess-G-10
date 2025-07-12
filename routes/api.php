@@ -42,4 +42,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/', [RetailerController::class, 'getOrders'])->middleware('auth:sanctum');
     Route::get('/{order}', [RetailerController::class, 'getOrder'])->middleware('auth:sanctum');
     Route::put('/{order}/status', [RetailerController::class, 'updateOrderStatus'])->middleware('auth:sanctum');
-}); 
+});
+
+// Customer Recommendations API
+Route::middleware('auth:sanctum')->get('/customer/recommendations', [\App\Http\Controllers\Customer\RecommendationController::class, 'index']); 

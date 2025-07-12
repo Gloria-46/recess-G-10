@@ -14,6 +14,7 @@ use App\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 
 // Retailer Authentication Routes
 Route::prefix('retailer')->name('retailer.')->group(function () {
@@ -129,7 +130,30 @@ Route::get('/customer/home', function () {
     $mostViewed = Product::orderByDesc('views')->take(6)->get();
     $mostOrdered = Product::withCount('orders')->orderByDesc('orders_count')->take(6)->get();
     $products = Product::all();
-    return view('customer.home', compact('mostViewed', 'mostOrdered', 'products'));
+    $user = Auth::guard('customer')->user();
+    $previouslyOrdered = collect();
+    $recommendations = collect();
+    if ($user) {
+        $previouslyOrdered = \App\Models\Product::whereIn('id', function($query) use ($user) {
+            $query->select('product_id')
+                ->from('order_items')
+                ->whereIn('order_id', function($q) use ($user) {
+                    $q->select('id')
+                        ->from('orders')
+                        ->where('user_id', $user->id);
+                });
+        })->get();
+
+        // Fetch recommendations for the user
+        $recommendationIds = DB::table('user_recommendations')
+            ->where('user_id', $user->id)
+            ->orderByDesc('score')
+            ->limit(5)
+            ->pluck('product_id');
+
+        $recommendations = Product::whereIn('id', $recommendationIds)->get();
+    }
+    return view('customer.home', compact('mostViewed', 'mostOrdered', 'products', 'previouslyOrdered', 'recommendations'));
 })->name('customer.home');
 
 // Customer Products Route
@@ -140,7 +164,20 @@ Route::get('/customer/products', function (\Illuminate\Http\Request $request) {
     } else {
         $products = \App\Models\Product::all();
     }
-    return view('customer.products', compact('products', 'category'));
+    $user = Auth::guard('customer')->user();
+    $previouslyOrdered = collect();
+    if ($user) {
+        $previouslyOrdered = \App\Models\Product::whereIn('id', function($query) use ($user) {
+            $query->select('product_id')
+                ->from('order_items')
+                ->whereIn('order_id', function($q) use ($user) {
+                    $q->select('id')
+                        ->from('orders')
+                        ->where('user_id', $user->id);
+                });
+        })->get();
+    }
+    return view('customer.products', compact('products', 'category', 'previouslyOrdered'));
 })->name('customer.products');
 
 // Customer Product Details Route
@@ -149,11 +186,152 @@ Route::get('/customer/products/{product}', function ($productId) {
     return view('customer.product_details', compact('product'));
 })->name('customer.products.show');
 
-// Customer Cart Route
+// Customer Cart Routes (restricted to logged-in customers)
+Route::middleware(['auth:customer'])->group(function () {
 Route::get('/customer/cart', function () {
     $cartItems = collect(session('cart', []));
     return view('customer.cart', compact('cartItems'));
 })->name('customer.cart');
+
+    Route::post('/customer/cart/add/{product}', function ($productId, \Illuminate\Http\Request $request) {
+        $product = Product::findOrFail($productId);
+
+        $cart = session()->get('cart', []);
+        $cart[] = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price,
+            'size' => $request->input('size'),
+            'color' => $request->input('color'),
+            'image' => $product->image,
+        ];
+        session(['cart' => $cart]);
+
+        $successMsg = 'Product added to cart! <a href="' . route('customer.cart') . '" class="underline text-blue-700 font-semibold ml-2">View Cart</a>';
+        return redirect()->back()->with('success', $successMsg);
+    })->name('customer.cart.add');
+
+    Route::post('/customer/cart/bulk-add/{product}', function ($productId, \Illuminate\Http\Request $request) {
+        $product = \App\Models\Product::findOrFail($productId);
+        $cart = session()->get('cart', []);
+        $quantities = $request->input('quantities', []);
+
+        foreach ($quantities as $size => $colors) {
+            foreach ($colors as $color => $qty) {
+                $qty = (int)$qty;
+                if ($qty > 0) {
+                    $cart[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price,
+                        'size' => $size,
+                        'color' => $color,
+                        'quantity' => $qty,
+                        'image' => $product->image,
+                    ];
+                }
+            }
+        }
+
+        session(['cart' => $cart]);
+        $successMsg = 'Products added to cart! <a href="' . route('customer.cart') . '" class="underline text-blue-700 font-semibold ml-2">View Cart</a>';
+        return redirect()->back()->with('success', $successMsg);
+    })->name('customer.cart.bulkAdd');
+
+    Route::post('/customer/cart/update/{product}', function ($productId, \Illuminate\Http\Request $request) {
+        $cart = session()->get('cart', []);
+        foreach ($cart as &$item) {
+            if ($item['id'] == $productId) {
+                $item['quantity'] = max(1, (int) $request->input('quantity', 1));
+                break;
+            }
+        }
+        session(['cart' => $cart]);
+        return redirect()->back()->with('success', 'Cart updated!');
+    })->name('customer.cart.update');
+
+    Route::post('/customer/cart/remove/{product}', function ($productId) {
+        $cart = session()->get('cart', []);
+        $cart = array_filter($cart, function ($item) use ($productId) {
+            return $item['id'] != $productId;
+        });
+        session(['cart' => array_values($cart)]);
+        return redirect()->back()->with('success', 'Item removed from cart!');
+    })->name('customer.cart.remove');
+
+    Route::post('/customer/cart/checkout', function (\Illuminate\Http\Request $request) {
+        $cartItems = collect(session('cart', []));
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('customer.cart')->with('error', 'Your cart is empty.');
+        }
+
+        $user = Auth::guard('customer')->user();
+        if (!$user) {
+            return redirect()->route('customer.login')->with('error', 'You must be logged in to place an order.');
+        }
+        $customerName = $user->name;
+        $customerEmail = $user->email;
+        $shippingAddress = $user->address ?: $request->input('shipping_address');
+        $totalAmount = $cartItems->sum(function($item) {
+            return $item['price'] * ($item['quantity'] ?? 1);
+        });
+
+        // Assume all products in cart belong to the same retailer (first product's retailer)
+        $firstProduct = \App\Models\Product::find($cartItems->first()['id']);
+        $retailerId = $firstProduct ? $firstProduct->retailer_id : null;
+
+        $order = \App\Models\Order::create([
+            'retailer_id' => $retailerId,
+            'user_id' => $user->id,
+            'order_number' => 'ORD-' . strtoupper(uniqid()),
+            'customer_name' => $customerName,
+            'customer_email' => $customerEmail,
+            'shipping_address' => $shippingAddress,
+            'total_amount' => $totalAmount,
+            'status' => 'pending',
+        ]);
+
+        // Fire event for real-time segmentation
+        event(new \App\Events\OrderPlaced($order));
+
+        // Trigger real-time recommendations update
+        try {
+            $process = new Symfony\Component\Process\Process(['python', base_path('ml_recommend.py')]);
+            $process->start(); // async, does not block checkout
+        } catch (\Exception $e) {
+            // Optionally log error
+        }
+
+        foreach ($cartItems as $item) {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item['id'],
+                'quantity' => $item['quantity'] ?? 1,
+                'price' => $item['price'],
+            ]);
+        }
+
+        session()->forget('cart');
+        return redirect()->route('customer.cart')->with('success', 'Checkout complete! Thank you for your order.');
+    })->name('customer.cart.checkout');
+
+    Route::get('/customer/orders', function () {
+        $user = Auth::guard('customer')->user();
+        $orders = collect();
+        if ($user) {
+            $orders = \App\Models\Order::where('user_id', $user->id)->latest()->paginate(10);
+        }
+        return view('customer.orders', compact('orders'));
+    })->name('customer.orders');
+
+    Route::get('/customer/orders/{order}', function ($orderId) {
+        $user = Auth::guard('customer')->user();
+        $order = \App\Models\Order::where('id', $orderId)
+            ->where('user_id', $user ? $user->id : null)
+            ->firstOrFail();
+        return view('customer.order_details', compact('order'));
+    })->name('customer.orders.show');
+});
 
 // Customer About Route
 Route::get('/customer/about', function () {
@@ -243,80 +421,7 @@ Route::post('/customer/contact', function (\Illuminate\Http\Request $request) {
     return back()->with('success', 'Your message has been sent! A copy has also been sent to your email.');
 })->name('customer.contact.send');
 
-// Customer Cart Add Route
-Route::post('/customer/cart/add/{product}', function ($productId, \Illuminate\Http\Request $request) {
-    $product = Product::findOrFail($productId);
+Route::get('/retailer/profile', [\App\Http\Controllers\Retailer\ProfileController::class, 'show'])->name('retailer.profile.show');
+Route::get('/retailer/profile/edit', [\App\Http\Controllers\Retailer\ProfileController::class, 'edit'])->name('retailer.profile.edit');
 
-    $cart = session()->get('cart', []);
-    $cart[] = [
-        'id' => $product->id,
-        'name' => $product->name,
-        'price' => $product->price,
-        'size' => $request->input('size'),
-        'color' => $request->input('color'),
-        'image' => $product->image,
-    ];
-    session(['cart' => $cart]);
-
-    return redirect()->back()->with('success', 'Product added to cart!');
-})->name('customer.cart.add');
-
-// Customer Cart Bulk Add Route
-Route::post('/customer/cart/bulk-add/{product}', function ($productId) {
-    // Implement bulk add logic here if needed
-    return redirect()->back()->with('success', 'Products added to cart!');
-})->name('customer.cart.bulkAdd');
-
-// Customer Category Filter Routes
-Route::get('/customer/products/category/{category}', function ($category) {
-    $products = \App\Models\Product::where('category', $category)->get();
-    return view('customer.products', compact('products', 'category'));
-})->name('customer.products.category');
-
-// Customer Orders Route
-Route::get('/customer/orders', function () {
-    $user = Auth::guard('customer')->user();
-    $orders = collect();
-    if ($user) {
-        $orders = Order::where('user_id', $user->id)->latest()->paginate(10);
-    }
-    return view('customer.orders', compact('orders'));
-})->name('customer.orders');
-
-// Customer Orders Details Route
-Route::get('/customer/orders/{order}', function ($orderId) {
-    $user = Auth::guard('customer')->user();
-    $order = Order::where('id', $orderId)
-        ->where('user_id', $user ? $user->id : null)
-        ->firstOrFail();
-    return view('customer.order_details', compact('order'));
-})->name('customer.orders.show');
-
-// Customer Cart Update Route
-Route::post('/customer/cart/update/{product}', function ($productId, \Illuminate\Http\Request $request) {
-    $cart = session()->get('cart', []);
-    foreach ($cart as &$item) {
-        if ($item['id'] == $productId) {
-            $item['quantity'] = max(1, (int) $request->input('quantity', 1));
-            break;
-        }
-    }
-    session(['cart' => $cart]);
-    return redirect()->back()->with('success', 'Cart updated!');
-})->name('customer.cart.update');
-
-// Customer Cart Remove Route
-Route::post('/customer/cart/remove/{product}', function ($productId) {
-    $cart = session()->get('cart', []);
-    $cart = array_filter($cart, function ($item) use ($productId) {
-        return $item['id'] != $productId;
-    });
-    session(['cart' => array_values($cart)]);
-    return redirect()->back()->with('success', 'Item removed from cart!');
-})->name('customer.cart.remove');
-
-// Customer Cart Checkout Route
-Route::post('/customer/cart/checkout', function () {
-    session()->forget('cart');
-    return redirect()->route('customer.cart')->with('success', 'Checkout complete! Thank you for your order.');
-})->name('customer.cart.checkout');
+Route::middleware(['auth:customer'])->get('/customer/recommendations', [\App\Http\Controllers\Customer\RecommendationController::class, 'index'])->name('customer.recommendations');

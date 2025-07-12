@@ -258,87 +258,39 @@
                     <h3 class="text-lg font-semibold text-gray-900">Order Timeline</h3>
                 </div>
                 <div class="px-6 py-4">
-                    <div class="flow-root">
-                        <ul class="-mb-8">
-                            <li>
-                                <div class="relative pb-8">
-                                    <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                                                <i class="fas fa-shopping-cart text-white text-sm"></i>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                            <div>
-                                                <p class="text-sm text-gray-500">Order placed</p>
-                                            </div>
-                                            <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                                <time datetime="{{ $order->created_at->format('Y-m-d H:i:s') }}">{{ $order->created_at->format('M d, g:i A') }}</time>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            @if($order->payment && $order->payment->isCompleted())
-                                <li>
-                                    <div class="relative pb-8">
-                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                                        <div class="relative flex space-x-3">
-                                            <div>
-                                                <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-credit-card text-white text-sm"></i>
-                                                </span>
-                                            </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Payment received</p>
-                                                </div>
-                                                <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                                                    <time datetime="{{ $order->payment->paid_at->format('Y-m-d H:i:s') }}">{{ $order->payment->paid_at->format('M d, g:i A') }}</time>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endif
-                            @if($order->status === 'processing')
-                                <li>
-                                    <div class="relative pb-8">
-                                        <div class="relative flex space-x-3">
-                                            <div>
-                                                <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-cog text-white text-sm"></i>
-                                                </span>
-                                            </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Processing order</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endif
-                            @if($order->status === 'completed')
-                                <li>
-                                    <div class="relative">
-                                        <div class="relative flex space-x-3">
-                                            <div>
-                                                <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                    <i class="fas fa-check text-white text-sm"></i>
-                                                </span>
-                                            </div>
-                                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">Order completed</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endif
-                        </ul>
+                    <div class="flex flex-col space-y-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                <i class="fas fa-shopping-cart text-white text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-500">Order placed</span>
+                            <span class="text-xs text-gray-400 ml-auto">{{ $order->created_at->format('M d, g:i A') }}</span>
+                        </div>
+                        @if($order->payment && $order->payment->isCompleted())
+                        <div class="flex items-center space-x-3">
+                            <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                <i class="fas fa-credit-card text-white text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-500">Payment received</span>
+                            <span class="text-xs text-gray-400 ml-auto">{{ $order->payment->paid_at->format('M d, g:i A') }}</span>
+                        </div>
+                        @endif
+                        @if($order->status === 'processing')
+                        <div class="flex items-center space-x-3">
+                            <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
+                                <i class="fas fa-cog text-white text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-500">Processing order</span>
+                        </div>
+                        @endif
+                        @if($order->status === 'completed')
+                        <div class="flex items-center space-x-3">
+                            <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </span>
+                            <span class="text-sm text-gray-500">Order completed</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

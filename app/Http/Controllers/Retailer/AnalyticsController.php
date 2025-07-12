@@ -5,17 +5,27 @@ namespace App\Http\Controllers\Retailer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Product;
+// use App\Models\SalesForecast; // Uncomment if you have a model
 
 class AnalyticsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $retailerId = Auth::guard('retailer')->id();
+        $month = $request->input('month');
 
-        // Sales over time (last 6 months)
-        $salesData = Order::where('retailer_id', $retailerId)
+        $orderQuery = Order::where('retailer_id', $retailerId);
+        if ($month) {
+            $orderQuery = $orderQuery
+                ->whereYear('created_at', substr($month, 0, 4))
+                ->whereMonth('created_at', substr($month, 5, 2));
+        }
+
+        // Sales over time (last 6 months, or filtered month)
+        $salesData = (clone $orderQuery)
             ->where('status', 'completed')
             ->selectRaw('DATE_FORMAT(created_at, "%b %Y") as month, SUM(total_amount) as total')
             ->groupBy('month')
@@ -25,8 +35,8 @@ class AnalyticsController extends Controller
         $salesLabels = $salesData->pluck('month');
         $salesTotals = $salesData->pluck('total');
 
-        // Sales per month for the last 12 months
-        $monthlySales = Order::where('retailer_id', $retailerId)
+        // Sales per month for the last 12 months (or filtered month)
+        $monthlySales = (clone $orderQuery)
             ->where('status', 'completed')
             ->selectRaw('DATE_FORMAT(created_at, "%b %Y") as month, SUM(total_amount) as total')
             ->groupBy('month')
@@ -41,19 +51,23 @@ class AnalyticsController extends Controller
         $stockLabels = $products->pluck('name');
         $stockData = $products->pluck('current_stock');
 
-        // Real-time stats
-        $totalOrders = Order::where('retailer_id', $retailerId)->count();
-        $completedOrders = Order::where('retailer_id', $retailerId)->where('status', 'completed')->count();
-        $pendingOrders = Order::where('retailer_id', $retailerId)->where('status', 'pending')->count();
-        $totalRevenue = Order::where('retailer_id', $retailerId)->where('status', 'completed')->sum('total_amount');
+        // Real-time stats (filtered by month if selected)
+        $totalOrders = (clone $orderQuery)->count();
+        $completedOrders = (clone $orderQuery)->where('status', 'completed')->count();
+        $pendingOrders = (clone $orderQuery)->where('status', 'pending')->count();
+        $totalRevenue = (clone $orderQuery)->where('status', 'completed')->sum('total_amount');
         $totalProducts = $products->count();
         $totalInventory = $products->sum('current_stock');
 
-        // Sales per product (stock sold and revenue)
-        $salesPerProduct = \App\Models\Product::where('retailer_id', $retailerId)
-            ->with(['orderItems' => function($q) {
-                $q->whereHas('order', function($oq) {
+        // Sales per product (stock sold and revenue, filtered by month if selected)
+        $salesPerProduct = Product::where('retailer_id', $retailerId)
+            ->with(['orderItems' => function($q) use ($month) {
+                $q->whereHas('order', function($oq) use ($month) {
                     $oq->where('status', 'completed');
+                    if ($month) {
+                        $oq->whereYear('created_at', substr($month, 0, 4))
+                           ->whereMonth('created_at', substr($month, 5, 2));
+                    }
                 });
             }])
             ->get()
@@ -65,6 +79,24 @@ class AnalyticsController extends Controller
                     'stock_remaining' => $product->current_stock,
                 ];
             });
+
+        // If you have a model:
+        // $forecasts = SalesForecast::orderBy('forecast_date')->get();
+        // If not, use DB facade:
+        $selectedProductId = $request->input('product_id');
+        $products = Product::orderBy('name')->get();
+        if ($selectedProductId) {
+            $forecasts = DB::table('sales_forecasts')
+                ->where('product_id', $selectedProductId)
+                ->orderBy('forecast_date')
+                ->get();
+        } else {
+            $forecasts = DB::table('sales_forecasts')
+                ->whereNull('product_id')
+                ->orWhere('product_id', '')
+                ->orderBy('forecast_date')
+                ->get();
+        }
 
         return view('retailer.analytics', [
             'salesLabels' => $salesLabels,
@@ -80,6 +112,10 @@ class AnalyticsController extends Controller
             'totalProducts' => $totalProducts,
             'totalInventory' => $totalInventory,
             'salesPerProduct' => $salesPerProduct,
+            'month' => $month,
+            'forecasts' => $forecasts,
+            'products' => $products,
+            'selected_product_id' => $selectedProductId,
         ]);
     }
 

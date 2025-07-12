@@ -11,7 +11,10 @@
             <div class="mb-4 p-2 bg-red-100 text-red-800 rounded">{{ session('error') }}</div>
         @endif
         @if($cartItems->isEmpty())
-            <div class="bg-white rounded-2xl shadow p-8 text-center text-gray-500">Your cart is empty.</div>
+            <div class="bg-white rounded-2xl shadow p-8 text-center text-gray-500">
+                Your cart is empty.
+                <a href="{{ route('customer.products') }}" class="mt-6 inline-block bg-blue-700 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow transition duration-200">Explore products</a>
+            </div>
         @else
             <div class="overflow-x-auto mb-8">
                 <table class="min-w-full w-full max-w-6xl mx-auto bg-white rounded-2xl shadow border border-gray-200">
@@ -73,20 +76,40 @@
             <!-- Payment and Delivery Details Form -->
             <div class="bg-white rounded-2xl shadow p-6 mt-6">
                 <h2 class="text-xl font-semibold mb-4 text-blue-900">Delivery & Payment Details</h2>
+                @php $user = Auth::guard('customer')->user(); @endphp
                 <form action="{{ route('customer.cart.checkout') }}" method="POST" class="max-w-xl mx-auto">
                     @csrf
-                    <div class="mb-4">
-                        <label for="customer_name" class="block font-semibold text-gray-700">Your Name</label>
-                        <input type="text" name="customer_name" id="customer_name" required class="w-full border rounded px-3 py-2">
-                    </div>
-                    <div class="mb-4">
-                        <label for="customer_email" class="block font-semibold text-gray-700">Your Email</label>
-                        <input type="email" name="customer_email" id="customer_email" required class="w-full border rounded px-3 py-2">
-                    </div>
-                    <div class="mb-4">
-                        <label for="shipping_address" class="block font-semibold text-gray-700">Delivery Address</label>
-                        <input type="text" name="shipping_address" id="shipping_address" required class="w-full border rounded px-3 py-2">
-                    </div>
+                    @if(!$user)
+                        <div class="mb-4">
+                            <label for="customer_name" class="block font-semibold text-gray-700">Your Name</label>
+                            <input type="text" name="customer_name" id="customer_name" required class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="mb-4">
+                            <label for="customer_email" class="block font-semibold text-gray-700">Your Email</label>
+                            <input type="email" name="customer_email" id="customer_email" required class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div class="mb-4">
+                            <label for="shipping_address" class="block font-semibold text-gray-700">Delivery Address</label>
+                            <input type="text" name="shipping_address" id="shipping_address" required class="w-full border rounded px-3 py-2">
+                        </div>
+                    @else
+                        <div class="mb-4">
+                            <label class="block font-semibold text-gray-700">Your Name</label>
+                            <div class="w-full border rounded px-3 py-2 bg-gray-100">{{ $user->name }}</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block font-semibold text-gray-700">Your Email</label>
+                            <div class="w-full border rounded px-3 py-2 bg-gray-100">{{ $user->email }}</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block font-semibold text-gray-700">Delivery Address</label>
+                            @if(empty($user->address))
+                                <input type="text" name="shipping_address" id="shipping_address" required class="w-full border rounded px-3 py-2" placeholder="Enter your delivery address">
+                            @else
+                                <div class="w-full border rounded px-3 py-2 bg-gray-100">{{ $user->address }}</div>
+                            @endif
+                        </div>
+                    @endif
                     <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full font-semibold">Confirm Order</button>
                 </form>
             </div>

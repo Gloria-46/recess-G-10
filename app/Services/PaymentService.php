@@ -38,10 +38,10 @@ class PaymentService
             Notification::route('mail', $order->customer_email)->notify(new CustomerOrderConfirmation($order));
         }
 
-        // Send email to vendor
-        $vendor = $order->vendor;
-        if ($vendor && $vendor->email) {
-            $vendor->notify(new RetailerNewOrder($order));
+        // Send the same email to retailer
+        $retailer = $order->retailer ?? $order->vendor;
+        if ($retailer && $retailer->email) {
+            Notification::route('mail', $retailer->email)->notify(new CustomerOrderConfirmation($order));
         }
 
         Log::info('Payment completed and order processed', [
