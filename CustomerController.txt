@@ -1,7 +1,0 @@
-use App\Models\Order;
-
-public function orders()
-{
-    $orders = Order::where('user_id', Auth::id())->latest()->get();
-    return view('customer.orders', compact('orders'));
-}
