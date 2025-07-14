@@ -215,39 +215,13 @@
             </div>
 
             <!-- Payment Information -->
-            @if($order->payment)
+            @if(false) {{-- Payment section removed --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900">Payment Information</h3>
                     </div>
                     <div class="px-6 py-4 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Payment Method</span>
-                            <span class="text-sm font-medium text-gray-900">{{ $order->payment->getPaymentMethodDisplay() }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Provider</span>
-                            <span class="text-sm font-medium text-gray-900">{{ $order->payment->getPaymentProviderDisplay() }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Transaction ID</span>
-                            <span class="text-sm font-mono text-gray-900">{{ $order->payment->transaction_id }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Status</span>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                {{ $order->payment->isCompleted() ? 'bg-green-100 text-green-800' : 
-                                   ($order->payment->isFailed() ? 'bg-red-100 text-red-800' : 
-                                   'bg-yellow-100 text-yellow-800') }}">
-                                {{ ucfirst($order->payment->status) }}
-                            </span>
-                        </div>
-                        @if($order->payment->paid_at)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500">Paid At</span>
-                                <span class="text-sm text-gray-900">{{ $order->payment->paid_at->format('M d, Y g:i A') }}</span>
-                            </div>
-                        @endif
+                        <!-- Payment details removed -->
                     </div>
                 </div>
             @endif

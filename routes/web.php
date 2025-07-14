@@ -71,12 +71,12 @@ Route::get('/customer/signup', [App\Http\Controllers\Customer\SignupController::
 Route::post('/customer/signup', [App\Http\Controllers\Customer\SignupController::class, 'register'])->name('customer.signup.submit');
 
 // Payment Routes
-Route::get('/customer/payment', [App\Http\Controllers\Customer\PaymentController::class, 'showPaymentForm'])->name('customer.payment.form');
-Route::post('/customer/payment/mobile-money', [App\Http\Controllers\Customer\PaymentController::class, 'processMobileMoney'])->name('customer.payment.mobile-money');
-Route::post('/customer/payment/visa-card', [App\Http\Controllers\Customer\PaymentController::class, 'processVisaCard'])->name('customer.payment.visa-card');
-Route::get('/customer/payment/status/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'showPaymentStatus'])->name('customer.payment.status');
-Route::get('/customer/payment/check-status/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'checkPaymentStatus'])->name('customer.payment.check-status');
-Route::post('/customer/payment/cancel/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'cancelPayment'])->name('customer.payment.cancel');
+// Route::get('/customer/payment', [App\Http\Controllers\Customer\PaymentController::class, 'showPaymentForm'])->name('customer.payment.form');
+// Route::post('/customer/payment/mobile-money', [App\Http\Controllers\Customer\PaymentController::class, 'processMobileMoney'])->name('customer.payment.mobile-money');
+// Route::post('/customer/payment/visa-card', [App\Http\Controllers\Customer\PaymentController::class, 'processVisaCard'])->name('customer.payment.visa-card');
+// Route::get('/customer/payment/status/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'showPaymentStatus'])->name('customer.payment.status');
+// Route::get('/customer/payment/check-status/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'checkPaymentStatus'])->name('customer.payment.check-status');
+// Route::post('/customer/payment/cancel/{payment}', [App\Http\Controllers\Customer\PaymentController::class, 'cancelPayment'])->name('customer.payment.cancel');
 
 Route::get('/lead', [App\Http\Controllers\LeadController::class, 'index'])->name('lead');
 

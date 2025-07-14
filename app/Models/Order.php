@@ -35,19 +35,4 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-
-    public function payment()
-    {
-        return $this->hasOne(Payment::class);
-    }
-
-    public function hasPayment()
-    {
-        return $this->payment()->exists();
-    }
-
-    public function isPaid()
-    {
-        return $this->payment && $this->payment->isCompleted();
-    }
 }
