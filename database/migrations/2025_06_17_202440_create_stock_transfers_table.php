@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('stock_transfers', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('product_id');
+            $table->string('to_branch');
+            $table->integer('quantity');
+            $table->unsignedBigInteger('staff_id');
             $table->timestamps();
         });
     }

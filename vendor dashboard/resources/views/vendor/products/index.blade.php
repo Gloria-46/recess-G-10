@@ -109,7 +109,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->id }}</td>
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                UGX {{ number_format($product->price, 2) }}
+                                                UGX {{ number_format($product->price, 0) }}
                                             </td>
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                 {{ $product->stock }}

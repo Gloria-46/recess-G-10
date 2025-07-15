@@ -13,65 +13,25 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Modern Theme CSS -->
+        <link rel="stylesheet" href="{{ asset('css/modern-theme.css') }}">
     </head>
-    <body class="font-sans antialiased relative">
+    <body class="modern-body">
         <x-navbar />
-        <!-- Dull, full-page background image -->
-        <div class="fixed inset-0 w-full h-full -z-10">
-            <img src="/images/uptrend-bg.jpg.jpg" alt="Background" class="w-full h-full object-cover" style="opacity:0.25;" />
-        </div>
-        @if (!Request::is('/'))
-            <button id="toggleSidebar" style="position:fixed; top:1rem; left:1rem; z-index:1001; background:#fff; border:none; border-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:0.5rem 0.75rem; font-size:1.5rem; cursor:pointer;">☰</button>
-            <x-sidebar />
-            <div id="main-content" class="min-h-screen max-w-7xl mx-auto py-10 px-4" style="margin-left:200px; transition: margin-left 0.3s;">
-        @else
-            <div class="min-h-screen max-w-7xl mx-auto py-10 px-4">
-        @endif
+        <div class="modern-container" style="min-height: 100vh; padding: 2rem 0;">
             @isset($header)
-                <header class="bg-white shadow mb-8">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="modern-card modern-mb-8">
+                    <div class="modern-card-body">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
-            <main>
+            <main class="modern-fade-in">
                 {{ $slot ?? '' }}
                 @yield('content')
             </main>
         </div>
-        @if (!Request::is('/'))
-        <script>
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const toggleBtn = document.getElementById('toggleSidebar');
-            // Check localStorage for sidebar state
-            let sidebarVisible = localStorage.getItem('sidebarVisible') !== 'false';
-            function showSidebar() {
-                sidebar.style.left = '0';
-                mainContent.style.marginLeft = '200px';
-                sidebarVisible = true;
-                localStorage.setItem('sidebarVisible', 'true');
-            }
-            function hideSidebar() {
-                sidebar.style.left = '-200px';
-                mainContent.style.marginLeft = '0';
-                sidebarVisible = false;
-                localStorage.setItem('sidebarVisible', 'false');
-            }
-            // Set initial state on page load
-            if (sidebarVisible) {
-                showSidebar();
-            } else {
-                hideSidebar();
-            }
-            toggleBtn.addEventListener('click', function() {
-                if (sidebarVisible) {
-                    hideSidebar();
-                } else {
-                    showSidebar();
-                }
-            });
-        </script>
-        @endif
+        <x-footer />
     </body>
 </html>

@@ -93,13 +93,13 @@
                                             {{ $item->product->name }}
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                            ${{ number_format($item->price, 2) }}
+                                            UGX{{ number_format($item->price, 0) }}
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                             {{ $item->quantity }}
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                            ${{ number_format($item->price * $item->quantity, 2) }}
+                                            UGX{{ number_format($item->price * $item->quantity, 0) }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -107,7 +107,7 @@
                             <tfoot>
                                 <tr>
                                     <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Total Amount:</td>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${{ number_format($order->total_amount, 2) }}</td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">UGX{{ number_format($order->total_amount, 0) }}</td>
                                 </tr>
                             </tfoot>
                         </table>

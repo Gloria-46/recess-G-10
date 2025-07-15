@@ -47,9 +47,7 @@
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                         {{ $order->customer_name }}
                                     </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        ${{ number_format($order->total_amount, 2) }}
-                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">UGX{{ number_format($order->total_amount, 0) }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm">
                                         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
                                             {{ $order->status === 'completed' ? 'bg-green-100 text-green-800' : 

@@ -17,6 +17,14 @@ return new class extends Migration
             $table->string('category');
             $table->integer('quantity')->default(0);
             $table->integer('reorder_level')->default(10);
+            $table->decimal('price', 10, 2)->nullable();
+            $table->json('colors')->nullable();
+            $table->json('sizes')->nullable();
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
+            $table->text('description')->nullable();
+            $table->string('batch')->nullable();
+            $table->string('image')->nullable();
+            $table->timestamp('date')->nullable();
             $table->timestamps();
         });
     }

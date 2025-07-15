@@ -97,7 +97,7 @@
                                 </dt>
                                 <dd class="flex items-baseline">
                                     <div class="text-2xl font-semibold text-gray-900">
-                                        UGX {{ number_format($stats['total_revenue'], 2) }}
+                                        UGX {{ number_format($stats['total_revenue'], 0) }}
                                     </div>
                                 </dd>
                             </dl>
@@ -144,9 +144,7 @@
                                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                             {{ $order->customer_name }}
                                         </td>
-                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                            ${{ number_format($order->total_amount, 2) }}
-                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">UGX{{ number_format($order->total_amount, 0) }}</td>
                                         <td class="whitespace-nowrap px-3 py-4 text-sm">
                                             <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
                                                 {{ $order->status === 'completed' ? 'bg-green-100 text-green-800' : 
