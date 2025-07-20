@@ -1,0 +1,11 @@
+{
+    "name": "CustomerRetail",
+    "alias": "customerretail",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CustomerRetail\\Providers\\CustomerRetailServiceProvider"
+    ],
+    "files": []
+}
