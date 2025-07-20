@@ -1,0 +1,48 @@
+BANK STATEMENT
+
+Bank: Test Bank Uganda
+Account Holder: Test Vendor Company
+Account Number: 1234567890
+Statement Period: January 2024
+
+ACCOUNT SUMMARY:
+Opening Balance: UGX 12,000,000
+Closing Balance: UGX 15,000,000
+Available Balance: UGX 15,000,000
+
+TRANSACTION HISTORY:
+
+Date: 2024-01-01
+Description: Opening Balance
+Amount: UGX 12,000,000
+Balance: UGX 12,000,000
+
+Date: 2024-01-15
+Description: Revenue Payment
+Amount: +UGX 3,000,000
+Balance: UGX 15,000,000
+
+Date: 2024-01-20
+Description: Operating Expenses
+Amount: -UGX 500,000
+Balance: UGX 14,500,000
+
+Date: 2024-01-25
+Description: Additional Revenue
+Amount: +UGX 500,000
+Balance: UGX 15,000,000
+
+FINANCIAL POSITION SUMMARY:
+Total Assets: UGX 15,000,000
+Current Liabilities: UGX 0
+Net Financial Position: UGX 15,000,000
+
+This statement confirms that Test Vendor Company maintains a strong financial position above the minimum requirement of UGX 10,000,000 for vendor registration.
+
+CERTIFICATION:
+This bank statement is authentic and has been verified by Test Bank Uganda.
+
+Bank Officer: _________________
+Date: _________________
+
+Note: This financial position meets all vendor registration requirements. 
